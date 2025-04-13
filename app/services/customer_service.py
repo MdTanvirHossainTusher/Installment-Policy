@@ -15,25 +15,25 @@ class CustomerService:
 
     def get_all_customers(self):
         try:
-            return self.db.query(Customer).all()
+            return self.db.query(Customer).filter(Customer.deleted == False).all()
         except SQLAlchemyError as e:
             logger.error(f"Error fetching customers: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error fetching customers: {str(e)}")
 
     def get_customer_by_id(self, customer_id: int):
         try:
-            customer = self.db.query(Customer).filter(Customer.id == customer_id).first()
+            customer = self.db.query(Customer).filter(Customer.id == customer_id, Customer.deleted == False).first()
             if customer is None:
                 raise HTTPException(status_code=400, detail=f"customer with ID: {customer_id} does not exist")
             
-            # return CustomerResponse(**customer.__dict__)
-            return CustomerResponse(
-                customer_id=customer.id,  # Map id to customer_id
-                name=customer.name,
-                email=customer.email,
-                mobile=customer.mobile,
-                role=customer.role
-            )
+            return CustomerResponse(**customer.__dict__)
+            # return CustomerResponse(
+            #     id=customer.id,
+            #     name=customer.name,
+            #     email=customer.email,
+            #     mobile=customer.mobile,
+            #     role=customer.role
+            # )
 
         except SQLAlchemyError as e:
             logger.error(f"Error retrieving customer: {str(e)}")
@@ -44,6 +44,12 @@ class CustomerService:
 
     def create_customer(self, customer: CustomerCreateRequest):
         try:
+            existing_customer = self.db.query(Customer).filter(Customer.email == customer.email, Customer.deleted == False).first()
+            if existing_customer:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Customer with email {customer.email} already exists"
+                )
             new_customer = Customer()
             if customer.email is not None: new_customer.email = customer.email
             if customer.password is not None: new_customer.password = self.bcrypt_context.hash(customer.password)
@@ -63,7 +69,7 @@ class CustomerService:
 
     def update_customer(self, customer_id: int, updated_customer: CustomerUpdateRequest):
         try:
-            customer = self.db.query(Customer).filter(customer.id == customer_id).first()
+            customer = self.db.query(Customer).filter(Customer.id == customer_id, Customer.deleted == False).first()
             if customer is None:
                 raise HTTPException(
                     status_code=400,
@@ -88,7 +94,7 @@ class CustomerService:
 
     def delete_customer(self, customer_id: int):
         try:
-            customer = self.db.query(Customer).filter(customer.id == customer_id).first()
+            customer = self.db.query(Customer).filter(Customer.id == customer_id, Customer.deleted == False).first()
             if customer is None:
                 raise HTTPException(
                     status_code=400,

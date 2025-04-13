@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, EmailStr
 from pydantic.v1 import root_validator
 from app.enums.roles import Roles
+import re
 
 
 class CustomerBase(BaseModel):
@@ -18,6 +19,14 @@ class CustomerUpdateRequest(CustomerBase):
     password: Optional[str] = Field(None, min_length=8, description='Customer password')
     mobile: Optional[str] = Field(None, pattern=r'^01[0-9]{9}$', 
                                   description='Customer mobile number (must be 11 digits starting with 01)')
+    @root_validator
+    def validate_mobile(cls, values):
+        v = values.get("mobile")
+        if v == "":
+            raise ValueError("Mobile number can't be empty")
+        if v is not None and not re.match(r'^01[0-9]{9}$', v):
+            raise ValueError('Mobile number must be 11 digits and start with 01')
+        return v
 
 
 class CustomerResponse(CustomerBase):
