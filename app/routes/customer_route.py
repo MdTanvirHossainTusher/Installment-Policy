@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from app.database import get_db
 from fastapi import Depends
-from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse
+from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, OTPVerificationRequest, EmailRequest
 from app.services.customer_service import CustomerService
 from starlette import status
 
@@ -19,7 +19,7 @@ async def get_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).get_customer_by_id(customer_id)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=CustomerResponse)
+@router.post("")
 async def create_customer(customer: CustomerCreateRequest, db: Session = Depends(get_db)):
     return CustomerService(db).create_customer(customer)
 
@@ -33,6 +33,16 @@ async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequ
 async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).delete_customer(customer_id)
 
+# @router.post("/verify_otp")
+# async def verify_otp(otp: str, db: Session = Depends(get_db)):
+#     return CustomerService(db).verify_otp(otp)
+
+
 @router.post("/verify_otp")
-async def verify_otp(otp: str, db: Session = Depends(get_db)):
-    return CustomerService(db).verify_otp(otp)
+async def verify_otp(verification: OTPVerificationRequest, db: Session = Depends(get_db)):
+    return CustomerService(db).verify_otp(verification.email, verification.otp, 
+                                        verification.password if hasattr(verification, 'password') else None)
+
+@router.post("/resend_otp")
+async def resend_otp(email_request: EmailRequest, db: Session = Depends(get_db)):
+    return CustomerService(db).resend_otp(email_request.email)

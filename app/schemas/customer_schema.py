@@ -27,6 +27,14 @@ class CustomerUpdateRequest(CustomerBase):
         if v is not None and not re.match(r'^01[0-9]{9}$', v):
             raise ValueError('Mobile number must be 11 digits and start with 01')
         return v
+    
+class EmailRequest(BaseModel):
+    email: EmailStr = Field(..., description='Email address to send OTP to')
+
+class OTPVerificationRequest(BaseModel):
+    email: EmailStr = Field(..., description='Email address used for registration')
+    otp: str = Field(..., description='One-time password sent to your email')
+    password: Optional[str] = Field(None, min_length=8, description='Password must be at least 8 characters long')
 
 
 class CustomerResponse(CustomerBase):
