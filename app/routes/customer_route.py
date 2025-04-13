@@ -32,3 +32,7 @@ async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequ
 @router.delete("/{customer_id}")
 async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).delete_customer(customer_id)
+
+@router.post("/verify_otp")
+async def verify_otp(otp: str, db: Session = Depends(get_db)):
+    return CustomerService(db).verify_otp(otp)

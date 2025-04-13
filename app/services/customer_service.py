@@ -12,6 +12,7 @@ class CustomerService:
     def __init__(self, db: Session):
         self.db = db
         self.bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+        self.otp = None
 
     def get_all_customers(self):
         try:
@@ -50,15 +51,30 @@ class CustomerService:
                     status_code=400,
                     detail=f"Customer with email {customer.email} already exists"
                 )
-            new_customer = Customer()
-            if customer.email is not None: new_customer.email = customer.email
-            if customer.password is not None: new_customer.password = self.bcrypt_context.hash(customer.password)
-            
-            self.db.add(new_customer)
-            self.db.commit()
-            self.db.refresh(new_customer)
+           
+            self.send_otp(customer.email)
 
-            return CustomerResponse(**new_customer.__dict__)
+            if(self.verify_otp()):
+                log.info(f"OTP verified successfully for {customer.email}")
+                new_customer = Customer()
+                if customer.email is not None: new_customer.email = customer.email
+                if customer.password is not None: new_customer.password = self.bcrypt_context.hash(customer.password)
+
+                self.db.add(new_customer)
+                self.db.commit()
+                self.db.refresh(new_customer)
+                return CustomerResponse(**new_customer.__dict__)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid OTP"
+                )
+
+            # self.db.add(new_customer)
+            # self.db.commit()
+            # self.db.refresh(new_customer)
+
+            # return CustomerResponse(**new_customer.__dict__)
 
         except SQLAlchemyError as e:
             logger.error(f"Error creating customer: {str(e)}")
@@ -112,3 +128,34 @@ class CustomerService:
                 status_code=500,
                 detail=f"Error deleting customer: {str(e)}"
             )
+
+    def generate_otp(self):
+        import random
+        otp = str(random.randint(100000, 999999))
+        return otp
+
+    def send_otp(self, input_email):
+        import smtplib
+        from email.message import EmailMessage
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+
+        self.otp = self.generate_otp()
+
+        from_mail = 'mohammedtusher1999@gmail.com'
+        server.login(from_mail, 'ehsv vlur yevq fepl')
+
+        msg = EmailMessage()
+        msg['Subject'] = 'OTP Verification' 
+        msg['From'] = from_mail
+        msg['To'] = input_email
+        # msg.set_content(f'Your OTP is {otp}')
+        msg.set_content(f'Your OTP is {self.otp}')
+
+        server.send_message(msg)
+        # server.quit()
+        return "OTP sent successfully"
+    
+    def verify_otp(self, entered_otp):
+        return entered_otp == self.otp
