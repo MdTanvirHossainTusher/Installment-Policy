@@ -1,10 +1,11 @@
+import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from app.models.customer import Customer
+from app.models.customer import Customer, UserSession
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, LoginRequest
-import datetime
+from datetime import datetime, timedelta
 import logging
 import smtplib
 import os
@@ -14,6 +15,8 @@ from dotenv import load_dotenv
 from fastapi_pagination import Page
 from app.models.pagination import PaginationParams
 from sqlalchemy import desc, asc
+from fastapi.security import HTTPBasicCredentials
+from starlette import status
 
 logger = logging.getLogger(__name__)
 
@@ -272,17 +275,83 @@ class CustomerService:
 
     def login_customer(self, customer: LoginRequest):
         email = customer.email
-        password = self.bcrypt_context.hash(customer.password)
+
         existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
         if not existing_customer:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Enter valid email"
             )
         if not self.bcrypt_context.verify(customer.password, existing_customer.password):
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid password"
             )
         return {"message": "Login successful"}
+    
+    def login_customer_using_basic_auth(self, credentials: HTTPBasicCredentials):
+        email = credentials.username
+        password = credentials.password
+
+        existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
+
+        if not existing_customer:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Enter valid email"
+            )
+        if not self.bcrypt_context.verify(password, existing_customer.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid password"
+            )
+        session_token = str(uuid.uuid4())
+        expires_at = datetime.now() + timedelta(hours=24)
+        
+        new_session = UserSession(id=session_token, customer_id=existing_customer.id, expires_at=expires_at, is_active=True)
+        
+        try:
+            self.db.add(new_session)
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error creating session: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to create session"
+            )
+        return {
+            "message": "Login successful",
+            "session_token": session_token,
+            "expires_at": expires_at
+        }
+    
+
+    def logout_customer(self, token: str):
+        if not token or not token.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token header",
+            )
+        token = token.split(" ")[1]
+        session = self.db.query(UserSession).filter(UserSession.id == token, UserSession.is_active == True, 
+                                                    UserSession.expires_at > datetime.now()).first()
+        
+        if not session:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired session",
+            )
+        try:
+            session.is_active = False
+            self.db.commit()
+
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error invalidating session: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Unable to logout"
+            )
+        return {"message": "Logout successful"}
 

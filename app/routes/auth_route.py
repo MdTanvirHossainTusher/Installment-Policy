@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from sqlalchemy.orm import Session
 from app.database import get_db
 from fastapi import Depends
@@ -7,7 +7,7 @@ from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateReq
 from app.services.customer_service import CustomerService
 
 
-router = APIRouter(prefix="/auth", tags=["Customer APIs"])
+router = APIRouter(prefix="/auth", tags=["Auth APIs"])
 
 db_session = Depends(get_db)
 security = HTTPBasic()
@@ -24,10 +24,15 @@ async def verify_otp(verification: OTPVerificationRequest, db: Session = db_sess
 async def resend_otp(email_request: EmailRequest, db: Session = db_session):
     return CustomerService(db).resend_otp(email_request.email)
 
-@router.post("/login")
-async def login_customer(customer: LoginRequest, db: Session = db_session):
-    return CustomerService(db).login_customer(customer)
-
 # @router.post("/login")
-# async def login_customer(credentials: HTTPBasicCredentials = Depends(security), db: Session = db_session):
-#     return CustomerService(db).login_customer_using_basic_auth(credentials)
+# async def login_customer(customer: LoginRequest, db: Session = db_session):
+#     return CustomerService(db).login_customer(customer)
+
+@router.post("/login")
+async def login_customer(credentials: HTTPBasicCredentials = Depends(security), db: Session = db_session):
+    return CustomerService(db).login_customer_using_basic_auth(credentials)
+
+@router.post("/logout")
+async def logout_customer(authorization: str = Header(...), db: Session = db_session):
+    # token = authorization.replace("Bearer ", "")
+    return CustomerService(db).logout_customer(authorization)
