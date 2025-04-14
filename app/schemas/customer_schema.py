@@ -35,6 +35,11 @@ class OTPVerificationRequest(BaseModel):
     email: EmailStr = Field(..., description='Email address used for registration')
     otp: str = Field(..., description='One-time password sent to your email')
 
+class LoginRequest(BaseModel):
+    email: EmailStr = Field(..., description='Email address to login')
+    password: str = Field(..., min_length=8, description='User password')
+
+
 class CustomerResponse(CustomerBase):
     id: int 
     name: Optional[str] = None

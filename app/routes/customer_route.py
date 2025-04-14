@@ -31,14 +31,14 @@ async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequ
 async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).delete_customer(customer_id)
 
-@router.post("")
-async def create_customer(customer: CustomerCreateRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).create_customer(customer)
+# @router.post("")
+# async def create_customer(customer: CustomerCreateRequest, db: Session = Depends(get_db)):
+#     return CustomerService(db).create_customer(customer)
 
-@router.post("/verify_otp")
-async def verify_otp(verification: OTPVerificationRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).verify_otp(verification.email, verification.otp)
+# @router.post("/verify_otp")
+# async def verify_otp(verification: OTPVerificationRequest, db: Session = Depends(get_db)):
+#     return CustomerService(db).verify_otp(verification.email, verification.otp)
 
-@router.post("/resend_otp")
-async def resend_otp(email_request: EmailRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).resend_otp(email_request.email)
+# @router.post("/resend_otp")
+# async def resend_otp(email_request: EmailRequest, db: Session = Depends(get_db)):
+#     return CustomerService(db).resend_otp(email_request.email)

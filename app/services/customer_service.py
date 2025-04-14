@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.customer import Customer
 from fastapi import HTTPException
 from passlib.context import CryptContext
-from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse
+from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, LoginRequest
 import datetime
 import logging
 import smtplib
@@ -268,4 +268,21 @@ class CustomerService:
         self.check_if_locked(email)
         self.send_otp(email)
         return {"message": "OTP resent successfully"}
+    
+
+    def login_customer(self, customer: LoginRequest):
+        email = customer.email
+        password = self.bcrypt_context.hash(customer.password)
+        existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
+        if not existing_customer:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Enter valid email"
+            )
+        if not self.bcrypt_context.verify(customer.password, existing_customer.password):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid password"
+            )
+        return {"message": "Login successful"}
 
