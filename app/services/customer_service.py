@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 class CustomerService:
+    otps = {}
+    otp_attempts = {}
+    locked_users = {}
+    user_passwords = {}
+
     def __init__(self, db: Session):
         self.db = db
         self.bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-        # self.otp = None
-        self.otps = {}
-        self.otp_attempts = {}
-        self.locked_users = {} 
 
     def get_all_customers(self):
         try:
@@ -37,15 +38,7 @@ class CustomerService:
             customer = self.db.query(Customer).filter(Customer.id == customer_id, Customer.deleted == False).first()
             if customer is None:
                 raise HTTPException(status_code=400, detail=f"customer with ID: {customer_id} does not exist")
-            
             return CustomerResponse(**customer.__dict__)
-            # return CustomerResponse(
-            #     id=customer.id,
-            #     name=customer.name,
-            #     email=email,
-            #     mobile=customer.mobile,
-            #     role=customer.role
-            # )
 
         except SQLAlchemyError as e:
             logger.error(f"Error retrieving customer: {str(e)}")
@@ -54,49 +47,10 @@ class CustomerService:
                 detail=f"Error retrieving customer: {str(e)}"
             )
 
-    # def create_customer(self, customer: CustomerCreateRequest):
-    #     try:
-    #         existing_customer = self.db.query(Customer).filter(email == email, Customer.deleted == False).first()
-    #         if existing_customer:
-    #             raise HTTPException(
-    #                 status_code=400,
-    #                 detail=f"Customer with email {email} already exists"
-    #             )
-           
-    #         self.send_otp(email)
-
-    #         if(self.verify_otp()):
-    #             log.info(f"OTP verified successfully for {email}")
-    #             new_customer = Customer()
-    #             if email is not None: new_email = email
-    #             if customer.password is not None: new_customer.password = self.bcrypt_context.hash(customer.password)
-
-    #             self.db.add(new_customer)
-    #             self.db.commit()
-    #             self.db.refresh(new_customer)
-    #             return CustomerResponse(**new_customer.__dict__)
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=400,
-    #                 detail="Invalid OTP"
-    #             )
-
-    #         # self.db.add(new_customer)
-    #         # self.db.commit()
-    #         # self.db.refresh(new_customer)
-
-    #         # return CustomerResponse(**new_customer.__dict__)
-
-    #     except SQLAlchemyError as e:
-    #         logger.error(f"Error creating customer: {str(e)}")
-    #         raise HTTPException(
-    #             status_code=500,
-    #             detail=f"Error creating customer: {str(e)}"
-    #         )
-
     def create_customer(self, customer: CustomerCreateRequest):
         try:
             email = customer.email
+            logger.info(f"Creating customer with email: {email}")
             self.check_if_locked(email)
             existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
             if existing_customer:
@@ -104,9 +58,13 @@ class CustomerService:
                     status_code=400,
                     detail=f"Customer with email {email} already exists"
                 )
-            if email not in self.otp_attempts:
-                self.otp_attempts[email] = 0
-                
+            if email not in CustomerService.otp_attempts:
+                logger.info(f"New customer with email: {email}")
+                logger.info(f'Otp attempts before init: {CustomerService.otp_attempts}')
+                CustomerService.otp_attempts[email] = 0
+                logger.info(f'Otp attempts after init: {CustomerService.otp_attempts}')
+
+            CustomerService.user_passwords[email] = customer.password
             self.send_otp(email)
             return {"message": "OTP sent successfully. Please verify to complete registration."}
             
@@ -165,19 +123,19 @@ class CustomerService:
             )
 
     def check_if_locked(self, email: EmailStr):
-        if email in self.locked_users:
-            lock_time = self.locked_users[email]
+        if email in CustomerService.locked_users:
+            lock_time = CustomerService.locked_users[email]
             current_time = datetime.datetime.now()
-            if (current_time - lock_time).total_seconds() < os.getenv('OTP_LOCK_TIME'):
-                remaining_seconds = os.getenv('OTP_LOCK_TIME') - int((current_time - lock_time).total_seconds())
+            if (current_time - lock_time).total_seconds() < int(os.getenv('OTP_LOCK_TIME', 300)):
+                remaining_seconds = int(os.getenv('OTP_LOCK_TIME', 300)) - int((current_time - lock_time).total_seconds())
                 remaining_minutes = remaining_seconds // 60
                 raise HTTPException(
                     status_code=429,
                     detail=f"Too many failed attempts. Please try again after {remaining_minutes} minutes."
                 )
             else:
-                del self.locked_users[email]
-                self.otp_attempts[email] = 0
+                del CustomerService.locked_users[email]
+                CustomerService.otp_attempts[email] = 0
 
     def generate_otp(self):
         import random
@@ -185,12 +143,11 @@ class CustomerService:
         return otp
 
     def send_otp(self, input_email):
-
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
 
         otp = self.generate_otp()
-        self.otps[input_email] = otp
+        CustomerService.otps[input_email] = otp
 
         from_mail = os.getenv('OTP_FROM_EMAIL')
         server.login(from_mail, os.getenv('APPLICATION_PASSWORD'))
@@ -200,47 +157,49 @@ class CustomerService:
         msg['From'] = from_mail
         msg['To'] = input_email
         msg.set_content(os.getenv('OTP_EMAIL_BODY').format(otp=otp))
+        logger.info(f'OTP message is {msg}')
 
         server.send_message(msg)
         server.quit()
         return "OTP sent successfully"
     
 
+    # def verify_otp(self, email: EmailStr, entered_otp: str, password: str = None):
     def verify_otp(self, email: EmailStr, entered_otp: str, password: str = None):
         self.check_if_locked(email)
 
-        if email not in self.otp_attempts:
-            self.otp_attempts[email] = 0
+        if email not in CustomerService.otp_attempts:
+            CustomerService.otp_attempts[email] = 0
 
-        if email not in self.otps:
+        if email not in CustomerService.otps:
             raise HTTPException(
                 status_code=400,
                 detail="No OTP has been sent to this email. Please request an OTP first."
             )
         
-        if entered_otp != self.otps[email]:
-            # if email in self.otp_attempts:
-            self.otp_attempts[email] += 1
-            # else:
-            #     self.otp_attempts[email] = 1
+        if entered_otp != CustomerService.otps[email]:
+            CustomerService.otp_attempts[email] += 1
                 
-            if self.otp_attempts[email] >= 3:
-                self.locked_users[email] = datetime.datetime.now()
+            if CustomerService.otp_attempts[email] >= 3:
+                CustomerService.locked_users[email] = datetime.datetime.now()
                 raise HTTPException(
                     status_code=429,
-                    detail="Too many failed attempts. Your account is locked for 2 hours."
+                    detail="Too many failed attempts. Your account is locked for 5 minutes."
                 )
             
-            remaining_attempts = 3 - self.otp_attempts[email]
+            remaining_attempts = 3 - CustomerService.otp_attempts[email]
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid OTP. {remaining_attempts} attempts remaining."
             )
-        
+
+        CustomerService.otp_attempts[email] = 0
+
+        if password is None:
+            password = CustomerService.user_passwords[email]
+
         if password:
             try:
-                self.otp_attempts[email] = 0
-
                 existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
                 if existing_customer:
                     raise HTTPException(
@@ -254,6 +213,12 @@ class CustomerService:
                 self.db.add(new_customer)
                 self.db.commit()
                 self.db.refresh(new_customer)
+
+                if email in CustomerService.otps:
+                    del CustomerService.otps[email]
+                if email in CustomerService.user_passwords:
+                    del CustomerService.user_passwords[email]
+
                 return CustomerResponse(**new_customer.__dict__)
                 
             except HTTPException:

@@ -19,11 +19,6 @@ async def get_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).get_customer_by_id(customer_id)
 
 
-@router.post("")
-async def create_customer(customer: CustomerCreateRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).create_customer(customer)
-
-
 @router.put("/{customer_id}")
 async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequest, db: Session = Depends(get_db)):
     return CustomerService(db).update_customer(customer_id, updated_customer)
@@ -33,15 +28,15 @@ async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequ
 async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).delete_customer(customer_id)
 
-# @router.post("/verify_otp")
-# async def verify_otp(otp: str, db: Session = Depends(get_db)):
-#     return CustomerService(db).verify_otp(otp)
-
+@router.post("")
+async def create_customer(customer: CustomerCreateRequest, db: Session = Depends(get_db)):
+    return CustomerService(db).create_customer(customer)
 
 @router.post("/verify_otp")
 async def verify_otp(verification: OTPVerificationRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).verify_otp(verification.email, verification.otp, 
-                                        verification.password if hasattr(verification, 'password') else None)
+    # return CustomerService(db).verify_otp(verification.email, verification.otp,
+    #                                     verification.password if hasattr(verification, 'password') else None)
+    return CustomerService(db).verify_otp(verification.email, verification.otp)
 
 @router.post("/resend_otp")
 async def resend_otp(email_request: EmailRequest, db: Session = Depends(get_db)):
