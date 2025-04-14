@@ -11,6 +11,9 @@ import os
 from pydantic import EmailStr
 from email.message import EmailMessage
 from dotenv import load_dotenv
+from fastapi_pagination import Page
+from app.models.pagination import PaginationParams
+from sqlalchemy import desc, asc
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +29,43 @@ class CustomerService:
         self.db = db
         self.bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-    def get_all_customers(self):
+
+    def get_all_customers(self, pagination: PaginationParams):
         try:
-            return self.db.query(Customer).filter(Customer.deleted == False).all()
+            query = self.db.query(Customer).filter(Customer.deleted == False, Customer.role != 'ADMIN')
+
+            if pagination.sort_by:
+                if hasattr(Customer, str(pagination.sort_by)):
+                    sort_column = getattr(Customer, str(pagination.sort_by))
+                    if pagination.sort_dir and pagination.sort_dir.lower() == 'desc':
+                        query = query.order_by(desc(sort_column))
+                    else:
+                        query = query.order_by(sort_column)
+            else:
+                query = query.order_by(asc(Customer.id))
+
+            total_items = query.count()
+            size = int(pagination.size)
+            total_pages = (total_items + size - 1) // size if size > 0 else 0
+            page = int(pagination.page)
+            query = query.offset((page - 1) * size).limit(size)
+
+            customers = query.all()
+            customer_responses = [CustomerResponse(**customer.__dict__) for customer in customers]
+
+            return Page[CustomerResponse](
+                items=customer_responses,
+                total=total_items,
+                page=page,
+                size=size,
+                pages=total_pages,
+                has_next=page < total_pages,
+                has_previous=page > 1
+            )
         except SQLAlchemyError as e:
             logger.error(f"Error fetching customers: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error fetching customers: {str(e)}")
+
 
     def get_customer_by_id(self, customer_id: int):
         try:
@@ -47,10 +81,10 @@ class CustomerService:
                 detail=f"Error retrieving customer: {str(e)}"
             )
 
+
     def create_customer(self, customer: CustomerCreateRequest):
         try:
             email = customer.email
-            logger.info(f"Creating customer with email: {email}")
             self.check_if_locked(email)
             existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
             if existing_customer:
@@ -59,10 +93,7 @@ class CustomerService:
                     detail=f"Customer with email {email} already exists"
                 )
             if email not in CustomerService.otp_attempts:
-                logger.info(f"New customer with email: {email}")
-                logger.info(f'Otp attempts before init: {CustomerService.otp_attempts}')
                 CustomerService.otp_attempts[email] = 0
-                logger.info(f'Otp attempts after init: {CustomerService.otp_attempts}')
 
             CustomerService.user_passwords[email] = customer.password
             self.send_otp(email)
@@ -76,6 +107,7 @@ class CustomerService:
                 status_code=500,
                 detail=f"Error creating customer: {str(e)}"
             )
+
 
     def update_customer(self, customer_id: int, updated_customer: CustomerUpdateRequest):
         try:
@@ -157,14 +189,12 @@ class CustomerService:
         msg['From'] = from_mail
         msg['To'] = input_email
         msg.set_content(os.getenv('OTP_EMAIL_BODY').format(otp=otp))
-        logger.info(f'OTP message is {msg}')
 
         server.send_message(msg)
         server.quit()
         return "OTP sent successfully"
     
 
-    # def verify_otp(self, email: EmailStr, entered_otp: str, password: str = None):
     def verify_otp(self, email: EmailStr, entered_otp: str, password: str = None):
         self.check_if_locked(email)
 

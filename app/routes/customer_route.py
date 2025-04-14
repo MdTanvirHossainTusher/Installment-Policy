@@ -4,14 +4,17 @@ from app.database import get_db
 from fastapi import Depends
 from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, OTPVerificationRequest, EmailRequest
 from app.services.customer_service import CustomerService
-from starlette import status
-
+from fastapi_pagination import Page, add_pagination
+from app.models.pagination import PaginationParams
 
 router = APIRouter(prefix="/customers", tags=["Customer APIs"])
 
-@router.get("", response_model=list[CustomerResponse])
-async def get_all_customers(db: Session = Depends(get_db)):
-    return CustomerService(db).get_all_customers()
+add_pagination(router)
+
+
+@router.get("", response_model=Page[CustomerResponse])
+async def get_all_customers(pagination: PaginationParams = Depends(), db: Session = Depends(get_db)):
+    return CustomerService(db).get_all_customers(pagination)
 
 
 @router.get("/{customer_id}")
@@ -34,8 +37,6 @@ async def create_customer(customer: CustomerCreateRequest, db: Session = Depends
 
 @router.post("/verify_otp")
 async def verify_otp(verification: OTPVerificationRequest, db: Session = Depends(get_db)):
-    # return CustomerService(db).verify_otp(verification.email, verification.otp,
-    #                                     verification.password if hasattr(verification, 'password') else None)
     return CustomerService(db).verify_otp(verification.email, verification.otp)
 
 @router.post("/resend_otp")
