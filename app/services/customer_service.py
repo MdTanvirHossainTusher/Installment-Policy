@@ -295,6 +295,13 @@ class CustomerService:
 
         existing_customer = self.db.query(Customer).filter(Customer.email == email, Customer.deleted == False).first()
 
+        already_logged_in = self.db.query(UserSession).filter(UserSession.customer_id == existing_customer.id, UserSession.is_active == True).first()
+        if already_logged_in:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="You are already logged in"
+            )
+
         if not existing_customer:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
