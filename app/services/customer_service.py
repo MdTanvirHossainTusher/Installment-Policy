@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from app.enums.roles import Roles
 from app.models.customer import Customer, UserSession
 from fastapi import HTTPException
 from passlib.context import CryptContext
@@ -112,14 +113,23 @@ class CustomerService:
             )
 
 
-    def update_customer(self, customer_id: int, updated_customer: CustomerUpdateRequest):
+    def update_customer(self, customer_id: int, updated_customer: CustomerUpdateRequest, current_user_id: int):
         try:
+            current_user = self.db.query(Customer).filter(Customer.id == current_user_id, Customer.deleted == False).first()
+        
+            if current_user.id != customer_id and current_user.role != Roles.ADMIN:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to update this customer's information"
+                )
+            
             customer = self.db.query(Customer).filter(Customer.id == customer_id, Customer.deleted == False).first()
             if customer is None:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"customer with ID: {customer_id} does not exist"
+                    detail=f"Customer with ID: {customer_id} does not exist"
                 )
+            
             if updated_customer.name is not None: customer.name = str(updated_customer.name)
             if updated_customer.password is not None: customer.password = self.bcrypt_context.hash(updated_customer.password)
             if updated_customer.mobile is not None: customer.mobile = updated_customer.mobile

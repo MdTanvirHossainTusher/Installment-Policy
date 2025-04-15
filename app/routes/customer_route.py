@@ -6,6 +6,7 @@ from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateReq
 from app.services.customer_service import CustomerService
 from fastapi_pagination import Page, add_pagination
 from app.models.pagination import PaginationParams
+from app.utils import AuthUtils
 
 router = APIRouter(prefix="/customers", tags=["Customer APIs"])
 
@@ -23,8 +24,10 @@ async def get_customer(customer_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{customer_id}")
-async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequest, db: Session = Depends(get_db)):
-    return CustomerService(db).update_customer(customer_id, updated_customer)
+async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequest, 
+                        current_user_id: int = Depends(AuthUtils.get_current_user_id), 
+                        db: Session = Depends(get_db)):
+    return CustomerService(db).update_customer(customer_id, updated_customer, current_user_id)
 
 
 @router.delete("/{customer_id}")

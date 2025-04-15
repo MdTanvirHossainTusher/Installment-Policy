@@ -20,6 +20,7 @@ RESOURCES_FOR_ROLES = {
         '/auth/logout': ['write']
     },
     'user': {
+        '/customers': ['read'],
         '/customers/**': ['read', 'update'],
         '/auth/register': ['write'],
         '/auth/verify_otp': ['write'],
