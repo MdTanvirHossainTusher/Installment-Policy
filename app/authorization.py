@@ -17,7 +17,9 @@ RESOURCES_FOR_ROLES = {
         '/auth/verify_otp': ['write'],
         '/auth/resend_otp': ['write'],
         '/auth/login': ['write'],
-        '/auth/logout': ['write']
+        '/auth/logout': ['write'],
+        '/products': ['read', 'write', 'update', 'delete'],
+        '/products/**': ['read', 'write', 'update', 'delete'],
     },
     'user': {
         '/customers': ['read'],
@@ -26,7 +28,9 @@ RESOURCES_FOR_ROLES = {
         '/auth/verify_otp': ['write'],
         '/auth/resend_otp': ['write'],
         '/auth/login': ['write'],
-        '/auth/logout': ['write']
+        '/auth/logout': ['write'],
+        '/products': ['read'],
+        '/products/**': ['read'],
     }
 }
 
