@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.enums.roles import Roles
-from app.models.product import Product
+from app.models.product import Category, Product
 from fastapi import HTTPException
 import logging
 from dotenv import load_dotenv
@@ -11,7 +11,7 @@ from app.models.pagination import PaginationParams
 from sqlalchemy import desc, asc
 from fastapi.security import HTTPBasicCredentials
 from starlette import status
-from app.schemas.product_schema import ProductCreateRequest, ProductUpdateRequest, ProductResponse
+from app.schemas.product_schema import ProductResponse
 from fastapi import UploadFile, File
 import os
 import shutil
@@ -26,6 +26,18 @@ class ProductService:
 
     def __init__(self, db: Session):
         self.db = db
+
+    def convert_to_product_response(self, product: Product) -> ProductResponse:
+        return ProductResponse(
+            id=product.id,
+            name=product.name,
+            description=product.description,
+            price=product.price,
+            quantity=product.quantity,
+            category_id=product.category_id,
+            category_name=self.db.query(Category).filter(Category.id == product.category_id).first().name,
+            image_url=product.image_url
+        )
     
     def get_all_products(self, pagination: PaginationParams):
         try:
@@ -48,7 +60,7 @@ class ProductService:
             query = query.offset((page - 1) * size).limit(size)
 
             products = query.all()
-            product_responses = [ProductResponse(**product.__dict__) for product in products]
+            product_responses = [self.convert_to_product_response(product) for product in products]
 
             return Page[ProductResponse](
                 items=product_responses,
@@ -69,7 +81,8 @@ class ProductService:
             product = self.db.query(Product).filter(Product.id == product_id, Product.deleted == False).first()
             if product is None:
                 raise HTTPException(status_code=400, detail=f"Product with ID: {product_id} does not exist")
-            return ProductResponse(**product.__dict__)
+
+            return self.convert_to_product_response(product)
 
         except SQLAlchemyError as e:
             logger.error(f"Error retrieving product: {str(e)}")
@@ -78,7 +91,7 @@ class ProductService:
                 detail=f"Error retrieving product: {str(e)}"
             )
         
-    def save_product_image(image_file: UploadFile) -> str:
+    def save_product_image(self, image_file: UploadFile) -> str:
         UPLOAD_DIR = os.getenv("PRODUCT_IMAGES_DIR", "app/static/uploads")
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -90,31 +103,30 @@ class ProductService:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image_file.file, buffer)
 
-        # return f"/product_images/{unique_filename}"
         return f"{UPLOAD_DIR}/{unique_filename}"
 
 
-    def create_product(self, product: ProductCreateRequest):
+    def create_product(self, product_data: dict):
         try:
             new_product = Product(
-                name=product.name,
-                description=product.description,
-                price=product.price,
-                quantity=product.quantity,
-                category_id=product.category_id,
+                name=product_data["name"],
+                description=product_data["description"],
+                price=product_data["price"],
+                quantity=product_data["quantity"],
+                category_id=product_data["category_id"],
                 is_available=True
             )
             
-            if product.image:
-                image_url = self.save_product_image(product.image)
+            if product_data["image"]:
+                image_url = self.save_product_image(product_data["image"])
                 new_product.image_url = image_url
 
             self.db.add(new_product)
             self.db.commit()
             self.db.refresh(new_product)
-            
-            return new_product
-                    
+
+            return self.convert_to_product_response(new_product)     
+        
         except HTTPException:
             raise
         except Exception as e:
@@ -125,7 +137,7 @@ class ProductService:
             )
 
 
-    def update_product(self, product_id: int, updated_product: ProductUpdateRequest):
+    def update_product(self, product_id: int, updated_product: dict):
         try:
             product = self.db.query(Product).filter(Product.id == product_id, Product.deleted == False).first()
             if product is None:
@@ -134,20 +146,20 @@ class ProductService:
                     detail=f"product with ID: {product_id} does not exist"
                 )
             
-            if updated_product.name: product.name = updated_product.name
-            if updated_product.description: product.description = updated_product.description
-            if updated_product.price: product.price = updated_product.price
-            if updated_product.quantity: product.quantity = updated_product.quantity
-            if updated_product.category_id: product.category_id = updated_product.category_id
-            if updated_product.image:
-                image_url = self.save_product_image(updated_product.image)
+            if updated_product["name"]: product.name = updated_product["name"]
+            if updated_product["description"]: product.description = updated_product["description"]
+            if updated_product["price"]: product.price = updated_product["price"]
+            if updated_product["quantity"]: product.quantity = updated_product["quantity"]
+            if updated_product["category_id"]: product.category_id = updated_product["category_id"]
+            if updated_product["image"]:
+                image_url = self.save_product_image(updated_product["image"])
                 product.image_url = image_url           
             
             self.db.add(product)
             self.db.commit()
             self.db.refresh(product)
 
-            return ProductResponse(**product.__dict__)
+            return self.convert_to_product_response(product)
 
         except SQLAlchemyError as e:
             logger.error(f"Error updating product: {str(e)}")
