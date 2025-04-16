@@ -3,8 +3,7 @@ from fastapi import Request, status, Header, Depends
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from datetime import datetime, timedelta
-from app.models.customer import UserSession
-from app.models.customer import Customer
+from app.models.models import UserSession, Customer
 from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 import fnmatch

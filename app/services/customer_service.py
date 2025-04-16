@@ -2,7 +2,7 @@ import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.enums.roles import Roles
-from app.models.customer import Customer, UserSession
+from app.models.models import Customer, UserSession
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, LoginRequest
@@ -14,7 +14,7 @@ from pydantic import EmailStr
 from email.message import EmailMessage
 from dotenv import load_dotenv
 from fastapi_pagination import Page
-from app.models.pagination import PaginationParams
+from app.schemas.pagination_schema import PaginationParams
 from sqlalchemy import desc, asc
 from fastapi.security import HTTPBasicCredentials
 from starlette import status

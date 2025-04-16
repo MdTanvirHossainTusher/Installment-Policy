@@ -3,15 +3,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from fastapi import Depends
 from fastapi_pagination import Page, add_pagination
-from app.models.pagination import PaginationParams
-from app.utils import AuthUtils
+from app.schemas.pagination_schema import PaginationParams
 from app.schemas.product_schema import ProductResponse
 from app.services.product_service import ProductService
 from typing import Optional
-from fastapi import Depends, FastAPI, File, Form, UploadFile
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from typing import Optional
+from fastapi import Depends, File, Form, UploadFile
 
 router = APIRouter(prefix="/products", tags=["Product APIs"])
 

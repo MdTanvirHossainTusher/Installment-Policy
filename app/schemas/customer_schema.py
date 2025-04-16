@@ -1,5 +1,4 @@
 from typing import Optional
-
 from pydantic import BaseModel, Field, EmailStr
 from pydantic.v1 import root_validator
 from app.enums.roles import Roles

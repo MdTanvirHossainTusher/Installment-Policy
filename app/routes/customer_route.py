@@ -2,10 +2,10 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from app.database import get_db
 from fastapi import Depends
-from app.schemas.customer_schema import CustomerCreateRequest, CustomerUpdateRequest, CustomerResponse, OTPVerificationRequest, EmailRequest
+from app.schemas.customer_schema import CustomerUpdateRequest, CustomerResponse
 from app.services.customer_service import CustomerService
 from fastapi_pagination import Page, add_pagination
-from app.models.pagination import PaginationParams
+from app.schemas.pagination_schema import PaginationParams
 from app.utils import AuthUtils
 
 router = APIRouter(prefix="/customers", tags=["Customer APIs"])

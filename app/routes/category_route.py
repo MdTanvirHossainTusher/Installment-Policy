@@ -5,7 +5,7 @@ from fastapi import Depends
 from app.schemas.category_schema import CategoryCreateRequest, CategoryUpdateRequest, CategoryResponse
 from app.services.category_service import CategoryService
 from fastapi_pagination import Page, add_pagination
-from app.models.pagination import PaginationParams
+from app.schemas.pagination_schema import PaginationParams
 from app.utils import AuthUtils
 
 router = APIRouter(prefix="/categories", tags=["Category APIs"])

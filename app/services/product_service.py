@@ -1,18 +1,15 @@
-import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.enums.roles import Roles
-from app.models.product import Category, Product
+from app.models.models import Product, Category
 from fastapi import HTTPException
 import logging
 from dotenv import load_dotenv
 from fastapi_pagination import Page
-from app.models.pagination import PaginationParams
+from app.schemas.pagination_schema import PaginationParams
 from sqlalchemy import desc, asc
-from fastapi.security import HTTPBasicCredentials
-from starlette import status
 from app.schemas.product_schema import ProductResponse
-from fastapi import UploadFile, File
+from fastapi import UploadFile
 import os
 import shutil
 from uuid import uuid4
