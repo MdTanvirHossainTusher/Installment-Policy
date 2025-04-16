@@ -3,18 +3,11 @@ from sqlalchemy import Boolean, Column, Integer, String, Enum, ForeignKey, DateT
 from sqlalchemy.orm import relationship
 from app.models.base_entity import BaseEntity
 from app.enums.roles import Roles
-from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql import func
-from app.database import Base
 import uuid
-from app.database import Base
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Float, DateTime, Table, Enum, text, func
-from sqlalchemy.orm import relationship
+from sqlalchemy import func
 import datetime
-import uuid
-from sqlalchemy.ext.declarative import declarative_base
-from app.models.base_entity import BaseEntity
 
 class UserSession(Base):
     __tablename__ = "sessions"
