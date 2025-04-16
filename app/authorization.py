@@ -20,6 +20,8 @@ RESOURCES_FOR_ROLES = {
         '/auth/logout': ['write'],
         '/products': ['read', 'write', 'update', 'delete'],
         '/products/**': ['read', 'write', 'update', 'delete'],
+        '/categories': ['read', 'write', 'update', 'delete'],
+        '/categories/**': ['read', 'write', 'update', 'delete'],
     },
     'user': {
         '/customers': ['read'],
@@ -31,6 +33,8 @@ RESOURCES_FOR_ROLES = {
         '/auth/logout': ['write'],
         '/products': ['read'],
         '/products/**': ['read'],
+        '/categories': ['read'],
+        '/categories/**': ['read'],
     }
 }
 

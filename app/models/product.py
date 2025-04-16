@@ -5,7 +5,7 @@ from app.models.base_entity import BaseEntity
 
 class Category(BaseEntity, Base):
     __tablename__ = "categories"
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, unique=True)
     products = relationship("Product", back_populates="category")
     
 
