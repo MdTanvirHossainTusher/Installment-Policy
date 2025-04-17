@@ -19,11 +19,11 @@ def send_installment_reminders(db: Session, days_before: int):
     logger.info(f"Running installment reminder job for payments due in {days_before} days")
 
     target_date = datetime.now() + timedelta(days=days_before)
-    # target_date_start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
-    # target_date_end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
+    target_date_start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+    target_date_end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
 
-    target_date_start = datetime(target_date.year, 5, 17, 0, 0, 0)
-    target_date_end = datetime(target_date.year, 5, 18, 23, 59, 59)
+    # target_date_start = datetime(target_date.year, 5, 17, 0, 0, 0)
+    # target_date_end = datetime(target_date.year, 5, 18, 23, 59, 59)
     
     try:
         due_items = (db.query(
@@ -92,17 +92,17 @@ def setup_scheduler():
     reminder_days_str = os.getenv('EMAIL_REMINDER_DAYS', '3,1,0')
     reminder_days = [int(days.strip()) for days in reminder_days_str.split(',')]
     
-    # for days in reminder_days:
-    #     scheduler.add_job(
-    #         send_installment_reminders,
-    #         # CronTrigger(hour=9, minute=0),
-    #         CronTrigger(minute='*'),
-    #         args=[next(get_db()), days],
-    #         id=f'installment_reminder_{days}days',
-    #         replace_existing=True
-    #     )
-    #     logger.info(f"Scheduled installment reminder job for {days} days before due date")
-    send_installment_reminders(next(get_db()), 0)
+    for days in reminder_days:
+        scheduler.add_job(
+            send_installment_reminders,
+            CronTrigger(hour=9, minute=0),
+            # CronTrigger(minute='*'),
+            args=[next(get_db()), days],
+            id=f'installment_reminder_{days}days',
+            replace_existing=True
+        )
+        logger.info(f"Scheduled installment reminder job for {days} days before due date")
+    # send_installment_reminders(next(get_db()), 0)
     return scheduler
 
 
