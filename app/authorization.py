@@ -21,6 +21,9 @@ RESOURCES_FOR_ROLES = {
         '/products/**': ['read', 'write', 'update', 'delete'],
         '/categories': ['read', 'write', 'update', 'delete'],
         '/categories/**': ['read', 'write', 'update', 'delete'],
+        '/carts/**': ['read', 'write', 'update', 'delete'],
+        # '/carts/*/*': ['read', 'write', 'update', 'delete'],
+        # '/carts/cart-item/**': ['read', 'write', 'update', 'delete'],
     },
     'user': {
         '/customers': ['read'],
@@ -34,6 +37,9 @@ RESOURCES_FOR_ROLES = {
         '/products/**': ['read'],
         '/categories': ['read'],
         '/categories/**': ['read'],
+        '/carts/**': ['read', 'write', 'update', 'delete'],
+        '/carts/*/*': ['read', 'write', 'update', 'delete'],
+        '/carts/cart-item/**': ['read', 'write', 'update', 'delete'],
     }
 }
 

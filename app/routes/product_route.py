@@ -75,3 +75,5 @@ async def delete_product(product_id: int, db: Session = db_session):
 async def add_to_cart(product_id: int, current_user_id: int = Depends(AuthUtils.get_current_user_id), db: Session = db_session):
     return ProductService(db).add_product_to_cart(product_id, current_user_id)
 
+
+

@@ -6,6 +6,7 @@ from fastapi import HTTPException
 import logging
 from dotenv import load_dotenv
 from fastapi_pagination import Page
+from app.schemas.cart_schema import CartItemResponse, CartItemUpdateRequest
 from app.schemas.pagination_schema import PaginationParams
 from sqlalchemy import desc, asc
 from app.schemas.product_schema import ProductResponse
@@ -14,6 +15,7 @@ import os
 import shutil
 from uuid import uuid4
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -193,6 +195,19 @@ class ProductService:
                     status_code=400,
                     detail=f"Product with ID: {product_id} does not exist"
                 )
+            existing_product = self.db.query(CartItem)\
+                .join(Cart, CartItem.cart_id == Cart.id)\
+                .filter(
+                    CartItem.product_id == product_id, 
+                    CartItem.deleted == False, 
+                    Cart.customer_id == customer_id
+                ).first()
+
+            if existing_product:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Product with ID: {product_id} already exists in the cart of customer ID: {customer_id}"
+                )
             
             cart = self.db.query(Cart).filter(Cart.customer_id == customer_id).first()
 
@@ -221,12 +236,85 @@ class ProductService:
             self.db.commit()
             self.db.refresh(cart_item)
 
-            return {"message": "Product added to cart successfully"}
+            # return {"message": "Product added to cart successfully"}
+            return CartItemResponse(
+                id=cart_item.id,
+                customer_id=customer_id,
+                product_id=product.id,
+                product_price=product.price,
+                cart_item_quantity=cart_item.cart_item_quantity,
+                bill=cart_item.bill,
+                paid_amount=cart_item.paid,
+                due_amount=cart_item.due,
+                next_installment_date=str(cart_item.next_installment_date)
+            );
 
         except SQLAlchemyError as e:
             logger.error(f"Error adding product to cart: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail=f"Error adding product to cart: {str(e)}"
+            )
+        
+
+    def update_cart_item(self, cart_item_id: int, updated_cart_item: CartItemUpdateRequest, customer_id: int):
+        try:
+            cart_item = self.db.query(CartItem).filter(CartItem.id == cart_item_id, CartItem.deleted == False).first()
+            if cart_item is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Cart item with ID: {cart_item_id} does not exist"
+                )
+            
+            cart = self.db.query(Cart).filter(Cart.id == cart_item.cart_id).first()
+            if cart.customer_id != customer_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You do not have permission to update this cart item"
+                )
+            
+            if updated_cart_item.paid_amount < (cart_item.price * updated_cart_item.cart_item_quantity * 0.3):
+                raise HTTPException(
+                    status_code=400,
+                    detail="You must pay at least 30% of the total product price"
+                )
+            if updated_cart_item.paid_amount > (cart_item.price * updated_cart_item.cart_item_quantity):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Paid amount cannot be greater than the total product price"
+                )
+
+            if cart_item.cart_item_quantity: cart_item.cart_item_quantity = updated_cart_item.cart_item_quantity
+            if cart_item.paid: cart_item.paid = updated_cart_item.paid_amount
+
+            cart_item.bill = cart_item.cart_item_quantity * cart_item.price
+            cart_item.due = cart_item.bill - cart_item.paid
+
+            next_date = datetime.now() + timedelta(days=30)
+            cart_item.next_installment_date = next_date
+
+            self.db.add(cart_item)
+            self.db.commit()
+            self.db.refresh(cart_item)
+
+            print(f"Date set: {next_date}, Retrieved date: {cart_item.next_installment_date}")
+
+            return CartItemResponse(
+                id=cart_item.id,
+                customer_id=customer_id,
+                product_id=cart_item.product_id,
+                product_price=cart_item.price,
+                cart_item_quantity=cart_item.cart_item_quantity,
+                bill=cart_item.bill,
+                paid_amount=cart_item.paid,
+                due_amount=cart_item.due,
+                next_installment_date=str(cart_item.next_installment_date)
+            );
+
+        except SQLAlchemyError as e:
+            logger.error(f"Error updating cart item: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error updating cart item: {str(e)}"
             )
 
