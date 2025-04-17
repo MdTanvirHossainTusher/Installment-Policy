@@ -407,4 +407,92 @@ class ProductService:
                 status_code=500,
                 detail=f"Error deleting cart item: {str(e)}"
             )
+        
+    def get_all_cart_items(self, customer_id: int, pagination: PaginationParams):
+        try:
+            query = self.db.query(CartItem)\
+                .join(Cart, CartItem.cart_id == Cart.id)\
+                .filter(Cart.customer_id == customer_id, CartItem.deleted == False)
+
+            if pagination.sort_by:
+                if hasattr(CartItem, str(pagination.sort_by)):
+                    sort_column = getattr(CartItem, str(pagination.sort_by))
+                    if pagination.sort_dir and pagination.sort_dir.lower() == 'desc':
+                        query = query.order_by(desc(sort_column))
+                    else:
+                        query = query.order_by(sort_column)
+            else:
+                query = query.order_by(asc(CartItem.id))
+
+            total_items = query.count()
+            size = int(pagination.size)
+            total_pages = (total_items + size - 1) // size if size > 0 else 0
+            page = int(pagination.page)
+            query = query.offset((page - 1) * size).limit(size)
+
+            cart_items = query.all()
+            cart_item_responses = [CartItemResponse(
+                id=cart_item.id,
+                customer_id=customer_id,
+                product_id=cart_item.product_id,
+                product_price=cart_item.price,
+                cart_item_quantity=cart_item.cart_item_quantity,
+                bill=cart_item.bill,
+                paid_amount=cart_item.paid,
+                due_amount=cart_item.due,
+                next_installment_date=str(cart_item.next_installment_date),
+                installment_count=cart_item.isntallment_count,
+                total_installment=cart_item.total_installment
+            ) for cart_item in cart_items]
+
+            return Page[CartItemResponse](
+                items=cart_item_responses,
+                total=total_items,
+                page=page,
+                size=size,
+                pages=total_pages,
+                has_next=page < total_pages,
+                has_previous=page > 1
+            )
+        except SQLAlchemyError as e:
+            logger.error(f"Error fetching cart items: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error fetching cart items: {str(e)}")
+        
+
+    def get_cart_item_by_id(self, cart_item_id: int, customer_id: int):
+        try:
+            cart_item = self.db.query(CartItem)\
+                .join(Cart, CartItem.cart_id == Cart.id)\
+                .filter(
+                    CartItem.id == cart_item_id, 
+                    Cart.customer_id == customer_id, 
+                    CartItem.deleted == False
+                ).first()
+            
+            if cart_item is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Cart item with ID: {cart_item_id} does not exist"
+                )
+            
+            return CartItemResponse(
+                id=cart_item.id,
+                customer_id=customer_id,
+                product_id=cart_item.product_id,
+                product_price=cart_item.price,
+                cart_item_quantity=cart_item.cart_item_quantity,
+                bill=cart_item.bill,
+                paid_amount=cart_item.paid,
+                due_amount=cart_item.due,
+                next_installment_date=str(cart_item.next_installment_date),
+                installment_count=cart_item.isntallment_count,
+                total_installment=cart_item.total_installment
+            )
+            
+        except SQLAlchemyError as e:
+            logger.error(f"Error retrieving cart item: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error retrieving cart item: {str(e)}"
+            )
 
