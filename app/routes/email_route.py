@@ -12,7 +12,7 @@ def test_email(db: Session = Depends(get_db)):
 
     email_service = EmailService()
     result = email_service.send_email_for_installment_due(
-        receiver_email="beast.reign10@gmail.com",
+        receiver_email="Enter your email address",
         customer_name="Test Customer",
         amount=100.00,
         due_date="2025-04-20",

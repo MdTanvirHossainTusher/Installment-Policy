@@ -94,7 +94,7 @@ def setup_scheduler():
             send_installment_reminders,
             CronTrigger(hour=9, minute=0),
             args=[next(get_db()), days],
-            id=f'installment_reminder_{0}days',
+            id=f'installment_reminder_{days}days',
             replace_existing=True
         )
         logger.info(f"Scheduled installment reminder job for {days} days before due date")
