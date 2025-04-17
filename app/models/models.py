@@ -63,17 +63,17 @@ class Cart(BaseEntity, Base):
     orders = relationship("Order", back_populates="cart", cascade="all, delete-orphan") # pore add
 
 
-class CartItem(Base):
+class CartItem(BaseEntity, Base):
     __tablename__ = "cart_items"
     
-    id = Column(Integer, primary_key=True, index=True)
     cart_id = Column(Integer, ForeignKey("carts.id"), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     price = Column(Float, nullable=False)
     paid = Column(Float, nullable=False, default=0.0)
     due = Column(Float, nullable=False, default=0.0)
     cart_item_quantity = Column(Integer, nullable=False, default=1)
-    next_installment_date = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now() + timedelta(days=30))
+    bill = Column(Float, nullable=False, default=0.0)
+    next_installment_date = Column(DateTime(timezone=True), nullable=True)
     
     cart = relationship("Cart", back_populates="items")
     product = relationship("Product")
@@ -84,7 +84,7 @@ class Order(BaseEntity, Base):
     
     cart_id = Column(Integer, ForeignKey("carts.id"), nullable=False)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
-    
+    total_bill = Column(Float, nullable=False, default=0.0)
     total_paid = Column(Float, nullable=False, default=0.0)
     total_due = Column(Float, nullable=False, default=0.0)
     ordered_quantity = Column(Integer, nullable=False, default=1)

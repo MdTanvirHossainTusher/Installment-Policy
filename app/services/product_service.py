@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.enums.roles import Roles
-from app.models.models import Product, Category
+from app.models.models import Cart, CartItem, Customer, Product, Category
 from fastapi import HTTPException
 import logging
 from dotenv import load_dotenv
@@ -185,4 +185,48 @@ class ProductService:
                 detail=f"Error deleting product: {str(e)}"
             )
 
+    def add_product_to_cart(self, product_id: int, customer_id: int):
+        try:
+            product = self.db.query(Product).filter(Product.id == product_id, Product.deleted == False).first()
+            if product is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Product with ID: {product_id} does not exist"
+                )
+            
+            cart = self.db.query(Cart).filter(Cart.customer_id == customer_id).first()
+
+            if cart is None:
+                new_cart = Cart(customer_id=customer_id)
+                self.db.add(new_cart)
+                self.db.commit()
+                self.db.refresh(new_cart)
+            else:
+                new_cart = cart
+            
+            cart_item = CartItem(
+                cart_id=new_cart.id, 
+                product_id=product.id,
+                price=product.price,
+                paid=product.price*1,
+                due=0.0,
+                cart_item_quantity=1,
+                bill=product.price,
+                next_installment_date=None,
+                created_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name,
+                updated_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name
+            )
+            
+            self.db.add(cart_item)
+            self.db.commit()
+            self.db.refresh(cart_item)
+
+            return {"message": "Product added to cart successfully"}
+
+        except SQLAlchemyError as e:
+            logger.error(f"Error adding product to cart: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error adding product to cart: {str(e)}"
+            )
 
