@@ -27,3 +27,12 @@ async def update_cart_item(
     db: Session = db_session
 ):
     return ProductService(db).update_cart_item(cart_item_id, cart_item, current_user_id)
+
+
+@router.delete("/cart-item/{cart_item_id}")
+async def delete_cart_item(
+    cart_item_id: int,
+    current_user_id: int = Depends(AuthUtils.get_current_user_id),
+    db: Session = db_session
+):
+    return ProductService(db).delete_cart_item(cart_item_id, current_user_id)

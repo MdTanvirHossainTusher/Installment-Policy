@@ -10,9 +10,10 @@ class CartBase(BaseModel):
     pass
 
 class CartItemUpdateRequest(CartBase):
-    cart_item_quantity: int = Field(..., gt=0, description='Quantity of the item in the cart')
+    cart_item_quantity: Optional[int] = Field(1, gt=0, description='Quantity of the item in the cart')
     paid_amount: float = Field(..., gt=0, description='Amount paid for the item')
-    # due_amount: float = Field(..., gt=0, description='Amount due for the item')
+    total_installment: Optional[int] = Field(1, gt=0, description='Total number of installments')
+
 
 class CartItemResponse(CartBase):
     id: int 
@@ -24,5 +25,5 @@ class CartItemResponse(CartBase):
     paid_amount: float
     due_amount: float
     next_installment_date: Optional[str] = None
-    # created_by: str
-    # updated_by: Optional[str] = None
+    installment_count: int
+    total_installment: int

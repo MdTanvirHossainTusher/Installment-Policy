@@ -209,7 +209,7 @@ class ProductService:
                     detail=f"Product with ID: {product_id} already exists in the cart of customer ID: {customer_id}"
                 )
             
-            cart = self.db.query(Cart).filter(Cart.customer_id == customer_id).first()
+            cart = self.db.query(Cart).filter(Cart.customer_id == customer_id, Cart.deleted == False).first()
 
             if cart is None:
                 new_cart = Cart(customer_id=customer_id)
@@ -228,6 +228,8 @@ class ProductService:
                 cart_item_quantity=1,
                 bill=product.price,
                 next_installment_date=None,
+                isntallment_count=0,
+                total_installment=1,
                 created_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name,
                 updated_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name
             )
@@ -236,7 +238,6 @@ class ProductService:
             self.db.commit()
             self.db.refresh(cart_item)
 
-            # return {"message": "Product added to cart successfully"}
             return CartItemResponse(
                 id=cart_item.id,
                 customer_id=customer_id,
@@ -246,7 +247,9 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date)
+                next_installment_date=str(cart_item.next_installment_date),
+                installment_count=cart_item.isntallment_count,
+                total_installment=cart_item.total_installment
             );
 
         except SQLAlchemyError as e:
@@ -272,33 +275,70 @@ class ProductService:
                     status_code=403,
                     detail="You do not have permission to update this cart item"
                 )
+
+            is_first_installment = cart_item.isntallment_count == 0
             
-            if updated_cart_item.paid_amount < (cart_item.price * updated_cart_item.cart_item_quantity * 0.3):
+            has_total_installment_field = 'total_installment' in updated_cart_item.model_fields_set
+            
+            if has_total_installment_field:
+                if not is_first_installment:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="You cannot update the total installment after first installment"
+                    )
+                cart_item.total_installment = updated_cart_item.total_installment
+            
+            has_quantity_field = 'cart_item_quantity' in updated_cart_item.model_fields_set
+            
+            if has_quantity_field:
+                if not is_first_installment:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="You cannot update the quantity of the product after first installment"
+                    )
+                cart_item.cart_item_quantity = updated_cart_item.cart_item_quantity
+            
+            total_price = cart_item.price * cart_item.cart_item_quantity
+            
+            min_payment_per_installment = total_price / cart_item.total_installment
+            
+            if updated_cart_item.paid_amount < min_payment_per_installment:
                 raise HTTPException(
                     status_code=400,
-                    detail="You must pay at least 30% of the total product price"
+                    detail=f"You must pay at least {min_payment_per_installment} of the total product price"
                 )
-            if updated_cart_item.paid_amount > (cart_item.price * updated_cart_item.cart_item_quantity):
+            
+            if updated_cart_item.paid_amount > total_price:
                 raise HTTPException(
                     status_code=400,
                     detail="Paid amount cannot be greater than the total product price"
                 )
-
-            if cart_item.cart_item_quantity: cart_item.cart_item_quantity = updated_cart_item.cart_item_quantity
-            if cart_item.paid: cart_item.paid = updated_cart_item.paid_amount
-
-            cart_item.bill = cart_item.cart_item_quantity * cart_item.price
+            
+            if cart_item.isntallment_count == cart_item.total_installment:
+                raise HTTPException(
+                    status_code=400,
+                    detail="You have already completed all installments for this product. Thank you!"
+                )
+            
+            if is_first_installment:
+                cart_item.paid = updated_cart_item.paid_amount
+            else:
+                cart_item.paid = cart_item.paid + updated_cart_item.paid_amount
+            
+            cart_item.bill = total_price
             cart_item.due = cart_item.bill - cart_item.paid
-
+            
             next_date = datetime.now() + timedelta(days=30)
             cart_item.next_installment_date = next_date
-
+            
+            cart_item.isntallment_count += 1
+            
             self.db.add(cart_item)
             self.db.commit()
             self.db.refresh(cart_item)
-
+            
             print(f"Date set: {next_date}, Retrieved date: {cart_item.next_installment_date}")
-
+            
             return CartItemResponse(
                 id=cart_item.id,
                 customer_id=customer_id,
@@ -308,13 +348,63 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date)
-            );
-
+                next_installment_date=str(cart_item.next_installment_date),
+                installment_count=cart_item.isntallment_count,
+                total_installment=cart_item.total_installment
+            )
+            
         except SQLAlchemyError as e:
             logger.error(f"Error updating cart item: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail=f"Error updating cart item: {str(e)}"
+            )
+        
+
+        
+    def delete_cart_item(self, cart_item_id: int, customer_id: int):
+        try:
+            cart_item = self.db.query(CartItem).filter(CartItem.id == cart_item_id, CartItem.deleted == False).first()
+            if cart_item is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Cart item with ID: {cart_item_id} does not exist"
+                )
+            
+            cart = self.db.query(Cart).filter(Cart.id == cart_item.cart_id).first()
+            if cart.customer_id != customer_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You do not have permission to delete this cart item"
+                )
+            if cart_item.due > 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="You cannot delete a cart item with due amount"
+                )
+            
+            cart_item.deleted = True
+            self.db.commit()
+            self.db.refresh(cart_item)
+
+            existing_product = self.db.query(CartItem)\
+                .join(Cart, CartItem.cart_id == Cart.id)\
+                .filter(
+                    CartItem.deleted == False, 
+                    Cart.customer_id == customer_id
+                ).first()
+            
+            if not existing_product:
+                cart.deleted = True
+                self.db.commit()
+                self.db.refresh(cart)
+
+            return {"message": "Cart item deleted successfully"}
+
+        except SQLAlchemyError as e:
+            logger.error(f"Error deleting cart item: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error deleting cart item: {str(e)}"
             )
 

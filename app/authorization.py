@@ -38,8 +38,8 @@ RESOURCES_FOR_ROLES = {
         '/categories': ['read'],
         '/categories/**': ['read'],
         '/carts/**': ['read', 'write', 'update', 'delete'],
-        '/carts/*/*': ['read', 'write', 'update', 'delete'],
-        '/carts/cart-item/**': ['read', 'write', 'update', 'delete'],
+        # '/carts/*/*': ['read', 'write', 'update', 'delete'],
+        # '/carts/cart-item/**': ['read', 'write', 'update', 'delete'],
     }
 }
 
