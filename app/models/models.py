@@ -74,7 +74,7 @@ class CartItem(BaseEntity, Base):
     cart_item_quantity = Column(Integer, nullable=False, default=1)
     bill = Column(Float, nullable=False, default=0.0)
     next_installment_date = Column(DateTime)
-    isntallment_count = Column(Integer, nullable=True, default=0)
+    installment_count = Column(Integer, nullable=True, default=0)
     total_installment = Column(Integer, nullable=True, default=1)
     
     cart = relationship("Cart", back_populates="items")

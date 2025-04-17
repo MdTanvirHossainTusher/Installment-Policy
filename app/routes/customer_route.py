@@ -6,6 +6,7 @@ from app.schemas.customer_schema import CustomerUpdateRequest, CustomerResponse
 from app.services.customer_service import CustomerService
 from fastapi_pagination import Page, add_pagination
 from app.schemas.pagination_schema import PaginationParams
+from app.services.email_service import EmailService
 from app.utils import AuthUtils
 
 router = APIRouter(prefix="/customers", tags=["Customer APIs"])
@@ -33,3 +34,7 @@ async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequ
 @router.delete("/{customer_id}")
 async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     return CustomerService(db).delete_customer(customer_id)
+
+
+
+

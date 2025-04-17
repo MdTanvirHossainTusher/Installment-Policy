@@ -228,7 +228,7 @@ class ProductService:
                 cart_item_quantity=1,
                 bill=product.price,
                 next_installment_date=None,
-                isntallment_count=0,
+                installment_count=0,
                 total_installment=1,
                 created_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name,
                 updated_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name
@@ -248,7 +248,7 @@ class ProductService:
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
                 next_installment_date=str(cart_item.next_installment_date),
-                installment_count=cart_item.isntallment_count,
+                installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             );
 
@@ -276,7 +276,7 @@ class ProductService:
                     detail="You do not have permission to update this cart item"
                 )
 
-            is_first_installment = cart_item.isntallment_count == 0
+            is_first_installment = cart_item.installment_count == 0
             
             has_total_installment_field = 'total_installment' in updated_cart_item.model_fields_set
             
@@ -314,7 +314,7 @@ class ProductService:
                     detail="Paid amount cannot be greater than the total product price"
                 )
             
-            if cart_item.isntallment_count == cart_item.total_installment:
+            if cart_item.installment_count == cart_item.total_installment:
                 raise HTTPException(
                     status_code=400,
                     detail="You have already completed all installments for this product. Thank you!"
@@ -331,7 +331,7 @@ class ProductService:
             next_date = datetime.now() + timedelta(days=30)
             cart_item.next_installment_date = next_date
             
-            cart_item.isntallment_count += 1
+            cart_item.installment_count += 1
             
             self.db.add(cart_item)
             self.db.commit()
@@ -349,7 +349,7 @@ class ProductService:
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
                 next_installment_date=str(cart_item.next_installment_date),
-                installment_count=cart_item.isntallment_count,
+                installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             )
             
@@ -441,7 +441,7 @@ class ProductService:
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
                 next_installment_date=str(cart_item.next_installment_date),
-                installment_count=cart_item.isntallment_count,
+                installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             ) for cart_item in cart_items]
 
@@ -485,7 +485,7 @@ class ProductService:
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
                 next_installment_date=str(cart_item.next_installment_date),
-                installment_count=cart_item.isntallment_count,
+                installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             )
             
