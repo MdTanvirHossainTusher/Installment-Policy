@@ -16,16 +16,11 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 def send_installment_reminders(db: Session, days_before: int):
-
     logger.info(f"Running installment reminder job for payments due in {days_before} days")
-    
 
-    # target_date = datetime.now() + timedelta(days=days_before)
-    # target_date_start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
-    # target_date_end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
-
-    target_date_start = datetime(2025, 5, 17, 0, 0, 0)
-    target_date_end = datetime(2025, 5, 17, 23, 59, 59)
+    target_date = datetime.now() + timedelta(days=days_before)
+    target_date_start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+    target_date_end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
     
     try:
         due_items = (db.query(
@@ -55,7 +50,6 @@ def send_installment_reminders(db: Session, days_before: int):
                     'name': customer.name,
                     'items': []
                 }
-            
             customer_due_items[customer.email]['items'].append({
                 'product_name': product.name,
                 'installment_count': item.installment_count,
@@ -89,27 +83,21 @@ def send_installment_reminders(db: Session, days_before: int):
     except Exception as e:
         logger.error(f"Error in installment reminder job: {str(e)}")
 
+
 def setup_scheduler():
-
-
     scheduler = BackgroundScheduler()
-
     reminder_days_str = os.getenv('EMAIL_REMINDER_DAYS', '3,1,0')
     reminder_days = [int(days.strip()) for days in reminder_days_str.split(',')]
     
-    # for days in reminder_days:
-    # scheduler.add_job(
-    #     send_installment_reminders,
-    #     # CronTrigger(hour=9, minute=0),
-    #     CronTrigger(minute='*'),
-    #     # args=[next(get_db()), days],
-    #     args=[next(get_db()), 0],
-    #     id=f'installment_reminder_{0}days',
-    #     replace_existing=True
-    # )
-    send_installment_reminders(next(get_db()), 0)
-    logger.info(f"Scheduled installment reminder job for {0} days before due date")
-    
+    for days in reminder_days:
+        scheduler.add_job(
+            send_installment_reminders,
+            CronTrigger(hour=9, minute=0),
+            args=[next(get_db()), days],
+            id=f'installment_reminder_{0}days',
+            replace_existing=True
+        )
+        logger.info(f"Scheduled installment reminder job for {days} days before due date")
     return scheduler
 
 
