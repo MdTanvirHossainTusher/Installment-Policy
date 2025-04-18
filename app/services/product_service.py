@@ -546,6 +546,8 @@ class ProductService:
         
 
     def generate_csv_report(self, data):
+        if not data:
+            raise HTTPException(status_code=404, detail="No data available for the selected period.")
         output = io.StringIO()
         fieldnames = ['customer_email', 'customer_name', 'product_name', 'installment_count', 
                     'total_installment', 'bill', 'product_price', 'cart_item_quantity', 

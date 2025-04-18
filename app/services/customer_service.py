@@ -36,7 +36,7 @@ class CustomerService:
 
     def get_all_customers(self, pagination: PaginationParams):
         try:
-            query = self.db.query(Customer).filter(Customer.deleted == False, Customer.role != 'ADMIN')
+            query = self.db.query(Customer).filter(Customer.deleted == False)
 
             if pagination.sort_by:
                 if hasattr(Customer, str(pagination.sort_by)):
