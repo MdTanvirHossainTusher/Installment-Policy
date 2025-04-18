@@ -1,14 +1,17 @@
+import csv
+import io
+import json
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from app.enums.roles import Roles
 from app.models.models import Cart, CartItem, Customer, Product, Category
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 import logging
 from dotenv import load_dotenv
 from fastapi_pagination import Page
 from app.schemas.cart_schema import CartItemResponse, CartItemUpdateRequest
 from app.schemas.pagination_schema import PaginationParams
-from sqlalchemy import desc, asc
+from sqlalchemy import and_, desc, asc
 from app.schemas.product_schema import ProductResponse
 from fastapi import UploadFile
 import os
@@ -495,4 +498,72 @@ class ProductService:
                 status_code=500,
                 detail=f"Error retrieving cart item: {str(e)}"
             )
+        
+    def get_report_data(self, start_date, end_date):
+        try:
+            due_items = (self.db.query(
+                    CartItem, Cart, Customer, Product
+            ).join(
+                Cart, CartItem.cart_id == Cart.id
+            ).join(
+                Customer, Cart.customer_id == Customer.id
+            )
+            .join(
+                Product, CartItem.product_id == Product.id
+            )
+            .filter(
+                and_(
+                    CartItem.deleted == False,
+                    Cart.deleted == False,
+                    CartItem.next_installment_date >= start_date,
+                    CartItem.next_installment_date <= end_date
+                )
+            ).all())
 
+            report_data = []
+            for item, cart, customer, product in due_items:
+                report_data.append({
+                    'customer_email': customer.email,
+                    'customer_name': customer.name,
+                    'product_name': product.name,
+                    'installment_count': item.installment_count,
+                    'total_installment': item.total_installment,
+                    'bill': item.bill,
+                    'product_price': item.price,
+                    'cart_item_quantity': item.cart_item_quantity,
+                    'paid_amount': item.paid,
+                    'due_amount': item.due,
+                    'due_date': item.next_installment_date.strftime('%Y-%m-%d')
+                })
+            
+            return report_data
+        except SQLAlchemyError as e:
+            logger.error(f"Error fetching cart items: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error fetching cart items: {str(e)}")
+        
+
+    def generate_csv_report(self, data):
+        output = io.StringIO()
+        fieldnames = ['customer_email', 'customer_name', 'product_name', 'installment_count', 
+                    'total_installment', 'bill', 'product_price', 'cart_item_quantity', 
+                    'paid_amount', 'due_amount', 'due_date']
+        
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for row in data:
+            writer.writerow(row)
+        
+        response = Response(content=output.getvalue())
+        response.headers["Content-Disposition"] = f"attachment; filename=payment_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        response.headers["Content-Type"] = "text/csv"
+
+        return response
+    
+
+    def generate_json_report(self, data):
+        response = Response(content=json.dumps(data, indent=2))
+        response.headers["Content-Disposition"] = f"attachment; filename=payment_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        response.headers["Content-Type"] = "application/json"
+        
+        return response
