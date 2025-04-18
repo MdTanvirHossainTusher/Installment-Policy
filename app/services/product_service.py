@@ -19,6 +19,9 @@ import shutil
 from uuid import uuid4
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+from io import BytesIO
+from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
 
@@ -653,3 +656,43 @@ class ProductService:
         except Exception as e:
             logger.error(f"Unexpected error in search cart items: {str(e)}")
             raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+        
+
+    def generate_payment_chart(self, data):
+        if not data:
+            raise HTTPException(status_code=404, detail="No data available for the selected period.")
+
+        payment_summary = {}
+        for entry in data:
+            email = entry['customer_email']
+            if email not in payment_summary:
+                payment_summary[email] = {'paid': 0.0, 'due': 0.0}
+            payment_summary[email]['paid'] += entry['paid_amount']
+            payment_summary[email]['due'] += entry['due_amount']
+
+        customers = list(payment_summary.keys())
+        paid_values = [payment_summary[c]['paid'] for c in customers]
+        due_values = [payment_summary[c]['due'] for c in customers]
+
+        x = range(len(customers))
+        width = 0.1
+
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.bar(x, paid_values, width, label='Paid Amount', color='green')
+        ax.bar([i + width for i in x], due_values, width, label='Due Amount', color='red')
+
+        ax.set_xlabel('Customers')
+        ax.set_ylabel('Amount')
+        ax.set_title('Paid vs Due Amounts')
+        ax.set_xticks([i + width / 2 for i in x])
+        ax.set_xticklabels(customers, rotation=0, ha="right")
+        ax.legend()
+
+        plt.tight_layout()
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close(fig)
+        buf.seek(0)
+
+        return StreamingResponse(buf, media_type="image/png")
