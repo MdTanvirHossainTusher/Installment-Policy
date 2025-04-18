@@ -23,8 +23,7 @@ RESOURCES_FOR_ROLES = {
         '/categories/**': ['read', 'write', 'update', 'delete'],
         '/carts/**': ['read', 'write', 'update', 'delete'],
         '/emails/test-email': ['read', 'write', 'update', 'delete'],
-        '/reports/generate': ['read', 'write', 'update', 'delete'],
-        '/reports/generate/**': ['read', 'write', 'update', 'delete'],
+        '/admin/**': ['read', 'write', 'update', 'delete'],
     },
     'user': {
         '/customers': ['read'],

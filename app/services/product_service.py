@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from fastapi_pagination import Page
 from app.schemas.cart_schema import CartItemResponse, CartItemUpdateRequest
 from app.schemas.pagination_schema import PaginationParams
-from sqlalchemy import and_, desc, asc
+from sqlalchemy import String, and_, cast, desc, asc, or_
 from app.schemas.product_schema import ProductResponse
 from fastapi import UploadFile
 import os
@@ -567,3 +567,89 @@ class ProductService:
         response.headers["Content-Type"] = "application/json"
         
         return response
+        
+
+    def search_cart_items(self, query):
+        try:
+            is_numeric = False
+            numeric_value = 0
+            try:
+                numeric_value = float(query)
+                is_numeric = True
+            except ValueError:
+                pass
+
+            search_filters = [
+                Customer.name.ilike(f"%{query}%"),
+                Customer.email.ilike(f"%{query}%"),
+                Customer.mobile.ilike(f"%{query}%"),
+                Product.name.ilike(f"%{query}%"),
+                cast(CartItem.bill, String).ilike(f"%{query}%"),
+                cast(CartItem.paid, String).ilike(f"%{query}%"),
+                cast(CartItem.due, String).ilike(f"%{query}%"),
+                cast(Product.price, String).ilike(f"%{query}%"),
+                cast(CartItem.cart_item_quantity, String).ilike(f"%{query}%")
+            ]
+            
+            try:
+                if len(query) == 10 and query[4] == '-' and query[7] == '-':
+                    date_obj = datetime.strptime(query, '%Y-%m-%d')
+                    search_filters.append(
+                        cast(CartItem.next_installment_date, String).ilike(f"%{query}%")
+                    )
+            except ValueError:
+                pass
+            
+            if is_numeric:
+                search_filters.extend([
+                    CartItem.bill == numeric_value,
+                    CartItem.paid == numeric_value,
+                    CartItem.due == numeric_value,
+                    Product.price == numeric_value,
+                    CartItem.cart_item_quantity == int(numeric_value) if numeric_value.is_integer() else False
+                ])
+            
+            cart_items = (self.db.query(
+                CartItem, Cart, Customer, Product
+            ).join(
+                Cart, CartItem.cart_id == Cart.id
+            ).join(
+                Customer, Cart.customer_id == Customer.id
+            ).join(
+                Product, CartItem.product_id == Product.id
+            ).filter(
+                and_(
+                    CartItem.deleted == False,
+                    Cart.deleted == False,
+                    or_(*search_filters)
+                )
+            ).all())
+
+            results = []
+            for item, cart, customer, product in cart_items:
+                results.append({
+                    "customer_id": customer.id,
+                    "customer_name": customer.name,
+                    "customer_email": customer.email,
+                    "customer_mobile": customer.mobile,
+                    "product_id": product.id,
+                    "product_name": product.name,
+                    "product_price": product.price,
+                    "cart_item_id": item.id,
+                    "installment_count": item.installment_count,
+                    "total_installment": item.total_installment,
+                    "bill": item.bill,
+                    "cart_item_quantity": item.cart_item_quantity,
+                    "paid_amount": item.paid,
+                    "due_amount": item.due,
+                    "due_date": item.next_installment_date.strftime('%Y-%m-%d') if item.next_installment_date else None
+                })
+            
+            return {"results": results, "count": len(results)}
+            
+        except SQLAlchemyError as e:
+            logger.error(f"Database error in search cart items: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Database error occurred: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error in search cart items: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
