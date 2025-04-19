@@ -18,10 +18,10 @@ async def create_report(type: str = 'csv', weekly: bool = True, db: Session = db
     if weekly: target_date = datetime.now() - timedelta(days=7)
     else: target_date = datetime.now() - timedelta(days=30)
 
-    start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
-    end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
-    # start = datetime(2025, 5, 13, 0, 0, 0)
-    # end = datetime(2025, 5, 20, 23, 59, 59)
+    # start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+    # end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
+    start = datetime(2025, 5, 13, 0, 0, 0)
+    end = datetime(2025, 5, 20, 23, 59, 59)
     data = ProductService(db).get_report_data(start, end)
     
     if type == 'csv': return ProductService(db).generate_csv_report(data)
@@ -38,10 +38,10 @@ async def search_anything(weekly: bool = True, db: Session = db_session):
     if weekly: target_date = datetime.now() - timedelta(days=7)
     else: target_date = datetime.now() - timedelta(days=30)
 
-    start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
-    end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
-    # start = datetime(2025, 5, 13, 0, 0, 0)
-    # end = datetime(2025, 5, 20, 23, 59, 59)
+    # start = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+    # end = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59)
+    start = datetime(2025, 5, 13, 0, 0, 0)
+    end = datetime(2025, 5, 20, 23, 59, 59)
 
     data = ProductService(db).get_report_data(start, end)
     return ProductService(db).generate_payment_chart(data)

@@ -338,6 +338,9 @@ class ProductService:
             cart_item.next_installment_date = next_date
             
             cart_item.installment_count += 1
+
+            # cart_item.created_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name,
+            cart_item.updated_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name
             
             self.db.add(cart_item)
             self.db.commit()
@@ -687,7 +690,7 @@ class ProductService:
         ax.set_ylabel('Amount')
         ax.set_title('Paid vs Due Amounts')
         ax.set_xticks([i + width / 2 for i in x])
-        ax.set_xticklabels(customers, rotation=0, ha="right")
+        ax.set_xticklabels(customers, rotation=45, ha="right")
         ax.legend()
 
         plt.tight_layout()

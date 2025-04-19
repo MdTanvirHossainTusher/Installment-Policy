@@ -12,11 +12,9 @@ from app.models.models import Customer
 from datetime import datetime
 from app.utils import AuthUtils
 
-router = APIRouter(prefix="/customers", tags=["Customer APIs"])
+router = APIRouter(prefix="/current-logged-in-user-details", tags=["Current User API"])
 
-add_pagination(router)
-
-@router.get("/#/me")
+@router.get("")
 async def get_logged_in_user(
         authorization: str = Header(None),
         db: Session = Depends(get_db)
@@ -54,27 +52,3 @@ async def get_logged_in_user(
     return {
         "role": customer.role.value
     }
-
-
-@router.get("", response_model=Page[CustomerResponse])
-async def get_all_customers(pagination: PaginationParams = Depends(), db: Session = Depends(get_db)):
-    return CustomerService(db).get_all_customers(pagination)
-
-
-@router.get("/{customer_id}")
-async def get_customer(customer_id: int, db: Session = Depends(get_db)):
-    return CustomerService(db).get_customer_by_id(customer_id)
-
-
-@router.put("/{customer_id}")
-async def update_customer(customer_id: int, updated_customer: CustomerUpdateRequest, 
-                        current_user_id: int = Depends(AuthUtils.get_current_user_id), 
-                        db: Session = Depends(get_db)):
-    return CustomerService(db).update_customer(customer_id, updated_customer, current_user_id)
-
-
-@router.delete("/{customer_id}")
-async def delete_customer(customer_id: int, db: Session = Depends(get_db)):
-    return CustomerService(db).delete_customer(customer_id)
-
-

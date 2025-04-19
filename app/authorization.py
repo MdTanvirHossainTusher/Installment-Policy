@@ -11,7 +11,9 @@ import fnmatch
 RESOURCES_FOR_ROLES = {
     'admin': {
         '/customers': ['read', 'write', 'update', 'delete'],
+        '/customers/#/me': ['read', 'write', 'update', 'delete'],
         '/customers/**': ['read', 'write', 'update', 'delete'],
+        '/auth/me': ['read', 'write', 'update', 'delete'],
         '/auth/register': ['write'],
         '/auth/verify_otp': ['write'],
         '/auth/resend_otp': ['write'],
@@ -24,6 +26,12 @@ RESOURCES_FOR_ROLES = {
         '/carts/**': ['read', 'write', 'update', 'delete'],
         '/emails/test-email': ['read', 'write', 'update', 'delete'],
         '/admin/**': ['read', 'write', 'update', 'delete'],
+        '/auth/me/role': ['read', 'write', 'update', 'delete'],
+        '/auth/**': ['read'],
+        '/auth/*': ['read'],
+        '/auth/bal': ['read'],
+        '/me': ['read', 'write', 'update', 'delete'],
+        '/current-logged-in-user-details': ['read', 'write', 'update', 'delete'],
     },
     'user': {
         '/customers': ['read'],
@@ -34,15 +42,21 @@ RESOURCES_FOR_ROLES = {
         '/auth/login': ['write'],
         '/auth/logout': ['write'],
         '/products': ['read'],
-        '/products/**': ['read'],
+        '/products/**': ['read', 'write'],
         '/categories': ['read'],
         '/categories/**': ['read'],
         '/carts/**': ['read', 'write', 'update', 'delete'],
+        '/auth/me': ['read', 'write', 'update', 'delete'],
+        '/auth/**': ['read'],
+        '/auth/*': ['read'],
+        '/customers/logged-in-user/#': ['read', 'write', 'update', 'delete'],
+        '/me': ['read', 'write', 'update', 'delete'],
+        '/current-logged-in-user-details': ['read', 'write', 'update', 'delete'],
         # '/emails/test-email': ['read', 'write', 'update', 'delete'],
     }
 }
 
-EXCLUDED_PATHS = ['/docs', '/openapi.json', '/auth/register', '/auth/login', '/auth/verify_otp', '/auth/resend_otp']
+EXCLUDED_PATHS = ['/docs', '/openapi.json', '/auth/register', '/auth/login', '/auth/verify_otp', '/auth/resend_otp', '/auth/me']
 
 def translate_method_to_action(method: str) -> str:
     method_permission_mapping = {
