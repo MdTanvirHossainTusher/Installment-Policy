@@ -12,6 +12,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return RedirectResponse(url="app/static/index.html")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*", "http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:3000"],
@@ -33,9 +37,9 @@ app.include_router(admin_route.router)
 app.include_router(logged_user_route.router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-@app.get("/", response_class=HTMLResponse)
-async def root():
-    return RedirectResponse(url="app/static/index.html")
+# @app.get("/", response_class=HTMLResponse)
+# async def root():
+#     return RedirectResponse(url="app/static/index.html")
 
 @app.on_event("startup")
 def startup_event():

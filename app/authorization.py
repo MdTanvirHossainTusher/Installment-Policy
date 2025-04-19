@@ -108,8 +108,8 @@ async def get_user_role_from_token(authorization, db):
 class RBACMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        
-        if path == '/':
+
+        if path in ['', '/']:
             return await call_next(request)
 
         for excluded in EXCLUDED_PATHS:
