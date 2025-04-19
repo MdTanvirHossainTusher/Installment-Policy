@@ -1,0 +1,2135 @@
+{
+	"info": {
+		"_postman_id": "9817cc09-6aac-426c-8125-1598a84ba876",
+		"name": "Instalment Policy",
+		"description": "RestAPIs where customers can purchase products with installment policy from a stakeholder who has a shop selling various products.\n\n### **Getting Started**\n\nTo run the apis in the local environment you need to setup below **scripts (pre-requests)** and **variables** in this collection-\n\n<img src=\"https://content.pstmn.io/17688674-dea6-44ba-9612-32af3aa21043/aW1hZ2UucG5n\" alt=\"Set%20the%20Pre-request%20scripts%20in%20the%20postman\" width=\"447\" height=\"255\">\n\n<img src=\"https://content.pstmn.io/c692379b-0ec1-47a1-bef9-8e70b7fc011b/aW1hZ2UucG5n\" alt=\"Session%20token%20value%20after%20login\" width=\"543\" height=\"359\">\n\n<img src=\"https://content.pstmn.io/3a765346-a302-4239-b9e9-29785eb6d66a/aW1hZ2UucG5n\" alt=\"Set%20the%20session%20token%20value%20for%20authorization\" width=\"687\" height=\"285\">",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39540382"
+	},
+	"item": [
+		{
+			"name": "Customer/User Related APIs",
+			"item": [
+				{
+					"name": "get all customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/customers?page=1&size=5",
+							"path": [
+								"customers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "sort_by",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "sort_dir",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List of all registered customers. All query params are optional.\n\nDefault values:\n\n- `page: 1`\n    \n- `size: 10`\n    \n- `sort_by: id`\n    \n- `sort_dir: asc`"
+					},
+					"response": [
+						{
+							"name": "get all customers",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/customers?page=1&size=5",
+									"path": [
+										"customers"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "5"
+										},
+										{
+											"key": "sort_by",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "sort_dir",
+											"value": "asc",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:44:01 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "239"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"name\": \"admin\",\n            \"email\": \"beast.reign10@gmail.com\",\n            \"mobile\": \"01943749831\",\n            \"role\": \"admin\"\n        },\n        {\n            \"id\": 2,\n            \"name\": null,\n            \"email\": \"md.tanvir.hossain.tusher@gmail.com\",\n            \"mobile\": null,\n            \"role\": \"user\"\n        }\n    ],\n    \"total\": 2,\n    \"page\": 1,\n    \"size\": 5,\n    \"pages\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "get a customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/customers/1",
+							"path": [
+								"customers",
+								"1"
+							]
+						},
+						"description": "Pass customer id: /customers/{id}"
+					},
+					"response": [
+						{
+							"name": "get a customer",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/customers/1",
+									"path": [
+										"customers",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:44:49 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "95"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"name\": \"admin\",\n    \"email\": \"beast.reign10@gmail.com\",\n    \"mobile\": \"01943749831\",\n    \"role\": \"admin\"\n}"
+						}
+					]
+				},
+				{
+					"name": "update a customer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"tusher\",\r\n    \"mobile\": \"01443534322\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/customers/2",
+							"path": [
+								"customers",
+								"2"
+							]
+						},
+						"description": "Pass customer id: /customers/{id}\n\nYou can update either name or mobile or both"
+					},
+					"response": [
+						{
+							"name": "update a customer",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"tusher\",\r\n    \"mobile\": \"01443534322\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/customers/2",
+									"path": [
+										"customers",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:46:22 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "106"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 2,\n    \"name\": \"tusher\",\n    \"email\": \"md.tanvir.hossain.tusher@gmail.com\",\n    \"mobile\": \"01443534322\",\n    \"role\": \"user\"\n}"
+						}
+					]
+				},
+				{
+					"name": "delete a customer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "/customers/2",
+							"path": [
+								"customers",
+								"2"
+							]
+						},
+						"description": "Pass customer id: /customers/{id}"
+					},
+					"response": [
+						{
+							"name": "delete a customer",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "/customers/2",
+									"path": [
+										"customers",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:49:58 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "43"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Customer deleted successfully\"\n}"
+						}
+					]
+				}
+			],
+			"description": "CRUD operations for customers."
+		},
+		{
+			"name": "Authentication Related APIs",
+			"item": [
+				{
+					"name": "register customer",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\",\r\n  \"password\": \"tusher@1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/auth/register",
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Pass valid email and password(at least 8 character long) to the request body. Then verify the OTP that sent to the given email using `/auth/verify_otp` endpoint."
+					},
+					"response": [
+						{
+							"name": "register customer",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\",\r\n  \"password\": \"tusher@1\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/auth/register",
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:52:03 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "76"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"OTP sent successfully. Please verify to complete registration.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "login customer",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "beast.reign10@gmail.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "tusher@1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "/auth/login",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Pass username(email) and password.\n\nIn response one of the value is: `\"session_token\": \"value\"`\n\nSet the `session_token` value to the `authToken` environment variable's key of this API collection."
+					},
+					"response": [
+						{
+							"name": "login customer",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/auth/login",
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:57:34 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "127"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Login successful\",\n    \"session_token\": \"2dddf89c-26f6-40a4-a2c1-fd83ef13e8b2\",\n    \"expires_at\": \"2025-04-20T01:57:35.953751\"\n}"
+						}
+					]
+				},
+				{
+					"name": "resend otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/auth/resend_otp",
+							"path": [
+								"auth",
+								"resend_otp"
+							]
+						},
+						"description": "User can request to resen the OTP for 3 times. Pass the email address that user used to register."
+					},
+					"response": [
+						{
+							"name": "resend otp",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/auth/resend_otp",
+									"path": [
+										"auth",
+										"resend_otp"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:53:40 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "37"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"OTP resent successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "logout customer",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "/auth/logout",
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logged in user will logout and the session will expire."
+					},
+					"response": [
+						{
+							"name": "logout customer",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/auth/logout",
+									"path": [
+										"auth",
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:59:39 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "31"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Logout successful\"\n}"
+						}
+					]
+				},
+				{
+					"name": "verify otp",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\",\r\n  \"otp\": \"722198\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/auth/verify_otp",
+							"path": [
+								"auth",
+								"verify_otp"
+							]
+						},
+						"description": "OTP will be sent to the given email address. Need to verify the OTP in 3 attemps, otherwise user will be locked for 5 minutes.\n\n<img src=\"https://content.pstmn.io/3ad62384-fa58-4d41-b4a6-9adb0ed7bb97/b3RwLmpwZw==\" alt=\"OTP%20sent%20to%20the%20email\" height=\"432\" width=\"347\">"
+					},
+					"response": [
+						{
+							"name": "verify otp",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"mohammedtusher1999@gmail.com\",\r\n  \"otp\": \"722198\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/auth/verify_otp",
+									"path": [
+										"auth",
+										"verify_otp"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 19:54:45 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "87"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"name\": null,\n    \"email\": \"mohammedtusher1999@gmail.com\",\n    \"mobile\": null,\n    \"role\": \"user\"\n}"
+						}
+					]
+				}
+			],
+			"description": "APIs for customer registration, login, logout, verify OTP, resend OTP."
+		},
+		{
+			"name": "Product Related APIs",
+			"item": [
+				{
+					"name": "create a product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Boat",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Woodern boat",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "20000",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/J:/boat.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "/products",
+							"path": [
+								"products"
+							]
+						},
+						"description": "Only admin can add a product. Upload an image from your local machine."
+					},
+					"response": [
+						{
+							"name": "create a product",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "BMW-L1",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "Latest model of L1 series",
+											"type": "text"
+										},
+										{
+											"key": "price",
+											"value": "15000000",
+											"type": "text"
+										},
+										{
+											"key": "quantity",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "category_id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "/J:/car-6483720_640.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "/products",
+									"path": [
+										"products"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:03:20 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "225"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"name\": \"BMW-L1\",\n    \"description\": \"Latest model of L1 series\",\n    \"price\": 15000000,\n    \"quantity\": 3,\n    \"category_id\": 1,\n    \"category_name\": \"accessories\",\n    \"image_url\": \"app/static/product_images/a97a9981-b366-4ecd-9689-329c39592067.jpg\"\n}"
+						}
+					]
+				},
+				{
+					"name": "update a product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "test",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "description",
+									"value": "Updated description",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "70000",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "quantity",
+									"value": "5",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "category_id",
+									"value": "2",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/J:/download.jpg",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "/products/3",
+							"path": [
+								"products",
+								"3"
+							]
+						},
+						"description": "Admin can update any number of fields. All fields are optional."
+					},
+					"response": [
+						{
+							"name": "update a product",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "test",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "description",
+											"value": "Updated description",
+											"type": "text"
+										},
+										{
+											"key": "price",
+											"value": "70000",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "quantity",
+											"value": "5",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "category_id",
+											"value": "2",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "/J:/download.jpg",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "/products/3",
+									"path": [
+										"products",
+										"3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:07:53 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "219"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"name\": \"BMW-L1\",\n    \"description\": \"Updated description\",\n    \"price\": 15000000,\n    \"quantity\": 3,\n    \"category_id\": 1,\n    \"category_name\": \"accessories\",\n    \"image_url\": \"app/static/product_images/a97a9981-b366-4ecd-9689-329c39592067.jpg\"\n}"
+						}
+					]
+				},
+				{
+					"name": "get all products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/products",
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "sort_dir",
+									"value": "asc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all products details. Both admin and customer can see it."
+					},
+					"response": [
+						{
+							"name": "get all products",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/products",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "size",
+											"value": "10",
+											"disabled": true
+										},
+										{
+											"key": "sort_by",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "sort_dir",
+											"value": "asc",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:08:07 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "743"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 1,\n            \"name\": \"BMW-L1\",\n            \"description\": \"Updated version of L1-254 model\",\n            \"price\": 15000000,\n            \"quantity\": 3,\n            \"category_id\": 1,\n            \"category_name\": \"accessories\",\n            \"image_url\": \"app/static/product_images/5e0ca64c-910f-4644-9ecb-5994fe60a4bb.jpg\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"BMW-L2\",\n            \"description\": \"Lastest model of L2 series. Extra speed.\",\n            \"price\": 10000000,\n            \"quantity\": 3,\n            \"category_id\": 1,\n            \"category_name\": \"accessories\",\n            \"image_url\": \"app/static/product_images/c0b1fe1f-3582-4f1f-8862-4515722cc055.jpg\"\n        },\n        {\n            \"id\": 3,\n            \"name\": \"BMW-L1\",\n            \"description\": \"Updated description\",\n            \"price\": 15000000,\n            \"quantity\": 3,\n            \"category_id\": 1,\n            \"category_name\": \"accessories\",\n            \"image_url\": \"app/static/product_images/a97a9981-b366-4ecd-9689-329c39592067.jpg\"\n        }\n    ],\n    \"total\": 3,\n    \"page\": 1,\n    \"size\": 10,\n    \"pages\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "get a product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/products/2",
+							"path": [
+								"products",
+								"2"
+							]
+						},
+						"description": "For both admin and customer. Get details of a particular product. Pass id: /products/{id}"
+					},
+					"response": [
+						{
+							"name": "get a product",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/products/2",
+									"path": [
+										"products",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:08:26 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "240"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 2,\n    \"name\": \"BMW-L2\",\n    \"description\": \"Lastest model of L2 series. Extra speed.\",\n    \"price\": 10000000,\n    \"quantity\": 3,\n    \"category_id\": 1,\n    \"category_name\": \"accessories\",\n    \"image_url\": \"app/static/product_images/c0b1fe1f-3582-4f1f-8862-4515722cc055.jpg\"\n}"
+						}
+					]
+				},
+				{
+					"name": "delete a product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "/products/1",
+							"path": [
+								"products",
+								"1"
+							]
+						},
+						"description": "Admin can delete a product. Pass id: /products/{id}"
+					},
+					"response": [
+						{
+							"name": "delete a product",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "/products/1",
+									"path": [
+										"products",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:08:36 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "42"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Product deleted successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "add to cart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "/products/3/add-to-cart",
+							"path": [
+								"products",
+								"3",
+								"add-to-cart"
+							]
+						},
+						"description": "Any user (admin, customer) can add a product to the cart. Pass id: /products/{id}/add-to-cart"
+					},
+					"response": [
+						{
+							"name": "add to cart",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/products/3/add-to-cart",
+									"path": [
+										"products",
+										"3",
+										"add-to-cart"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:09:08 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "224"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 9,\n    \"customer_id\": 1,\n    \"product_id\": 3,\n    \"product_price\": 15000000,\n    \"cart_item_quantity\": 1,\n    \"bill\": 15000000,\n    \"paid_amount\": 15000000,\n    \"due_amount\": 0,\n    \"next_installment_date\": \"None\",\n    \"installment_count\": 0,\n    \"total_installment\": 1\n}"
+						}
+					]
+				}
+			],
+			"description": "Admin can apply CRUD operations to the product. Any user can add a product to the cart."
+		},
+		{
+			"name": "Category Related APIs",
+			"item": [
+				{
+					"name": "create a category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"name\":\"book\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/categories",
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Pass only `category name` to create a category."
+					},
+					"response": [
+						{
+							"name": "create a category",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"name\":\"book\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/categories",
+									"path": [
+										"categories"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:20:40 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "22"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 4,\n    \"name\": \"book\"\n}"
+						}
+					]
+				},
+				{
+					"name": "get all categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/categories?page=2&size=3",
+							"path": [
+								"categories"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "size",
+									"value": "3"
+								},
+								{
+									"key": "sort_by",
+									"value": "name",
+									"disabled": true
+								},
+								{
+									"key": "sort_dir",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all category names and their ids."
+					},
+					"response": [
+						{
+							"name": "get all categories",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/categories?page=2&size=3",
+									"path": [
+										"categories"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "2"
+										},
+										{
+											"key": "size",
+											"value": "3"
+										},
+										{
+											"key": "sort_by",
+											"value": "name",
+											"disabled": true
+										},
+										{
+											"key": "sort_dir",
+											"value": "desc",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:21:20 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "72"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 4,\n            \"name\": \"book\"\n        }\n    ],\n    \"total\": 4,\n    \"page\": 2,\n    \"size\": 3,\n    \"pages\": 2\n}"
+						}
+					]
+				},
+				{
+					"name": "get a category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/categories/1",
+							"path": [
+								"categories",
+								"1"
+							]
+						},
+						"description": "Pass id: /categories/{id}"
+					},
+					"response": [
+						{
+							"name": "get a category",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/categories/1",
+									"path": [
+										"categories",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:21:38 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "29"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"name\": \"accessories\"\n}"
+						}
+					]
+				},
+				{
+					"name": "delete a category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "/categories/2",
+							"path": [
+								"categories",
+								"2"
+							]
+						},
+						"description": "Pass id: /categories/{id}"
+					},
+					"response": [
+						{
+							"name": "delete a category",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "/categories/2",
+									"path": [
+										"categories",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:22:07 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "43"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Category deleted successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "update a category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"name\":\"books\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/categories/4",
+							"path": [
+								"categories",
+								"4"
+							]
+						},
+						"description": "Pass id: /categories/{id} as path variable and `name` as request body to update the category name. Category `name` must be `unique`."
+					},
+					"response": [
+						{
+							"name": "update a category",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"name\":\"books\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/categories/4",
+									"path": [
+										"categories",
+										"4"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:22:41 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "23"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 4,\n    \"name\": \"books\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Only admin can do the category related CRUD operations."
+		},
+		{
+			"name": "Cart-Item/Installment Related APIs",
+			"item": [
+				{
+					"name": "get all cart-item of current user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/carts/items?page=1&size=5&sort_by=id&sort_dir=asc",
+							"path": [
+								"carts",
+								"items"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								},
+								{
+									"key": "sort_by",
+									"value": "id"
+								},
+								{
+									"key": "sort_dir",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "List of cart-items of the logged in user"
+					},
+					"response": [
+						{
+							"name": "get all cart-item of current user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/carts/items?page=1&size=5&sort_by=id&sort_dir=asc",
+									"path": [
+										"carts",
+										"items"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "size",
+											"value": "5"
+										},
+										{
+											"key": "sort_by",
+											"value": "id"
+										},
+										{
+											"key": "sort_dir",
+											"value": "asc"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:23:52 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "781"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"items\": [\n        {\n            \"id\": 7,\n            \"customer_id\": 1,\n            \"product_id\": 1,\n            \"product_price\": 15000000,\n            \"cart_item_quantity\": 3,\n            \"bill\": 45000000,\n            \"paid_amount\": 9500000,\n            \"due_amount\": 35500000,\n            \"next_installment_date\": \"2025-05-18 02:17:03.834056\",\n            \"installment_count\": 1,\n            \"total_installment\": 5\n        },\n        {\n            \"id\": 8,\n            \"customer_id\": 1,\n            \"product_id\": 2,\n            \"product_price\": 10000000,\n            \"cart_item_quantity\": 5,\n            \"bill\": 50000000,\n            \"paid_amount\": 37500000,\n            \"due_amount\": 12500000,\n            \"next_installment_date\": \"2025-05-17 20:15:04.293524\",\n            \"installment_count\": 3,\n            \"total_installment\": 4\n        },\n        {\n            \"id\": 9,\n            \"customer_id\": 1,\n            \"product_id\": 3,\n            \"product_price\": 15000000,\n            \"cart_item_quantity\": 1,\n            \"bill\": 15000000,\n            \"paid_amount\": 15000000,\n            \"due_amount\": 0,\n            \"next_installment_date\": \"None\",\n            \"installment_count\": 0,\n            \"total_installment\": 1\n        }\n    ],\n    \"total\": 3,\n    \"page\": 1,\n    \"size\": 5,\n    \"pages\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "update cart-item",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cart_item_quantity\": 3,\r\n    \"paid_amount\": 9000000.0,\r\n    \"total_installment\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/carts/cart-item/9",
+							"path": [
+								"carts",
+								"cart-item",
+								"9"
+							]
+						},
+						"description": "After adding a product to the cart with the default value, user can update the `cart_item_quantity` and `total_installment` value. User will be notified about at least how much money they should pay for each installment if they tried to pay less. After paying the first installment, user can't update the update the `cart_item_quantity` and `total_installment` value again. Only they can update the value of `paid_amount`\n\nCustomer can choose in how many installment (total_installment = n) he/she wants to pay the total bill.\n\nPass id: /carts/cart-item/{cart-item-id}"
+					},
+					"response": [
+						{
+							"name": "update cart-item",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"cart_item_quantity\": 3,\r\n    \"paid_amount\": 9000000.0,\r\n    \"total_installment\": 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/carts/cart-item/9",
+									"path": [
+										"carts",
+										"cart-item",
+										"9"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:25:48 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "252"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 9,\n    \"customer_id\": 1,\n    \"product_id\": 3,\n    \"product_price\": 15000000,\n    \"cart_item_quantity\": 3,\n    \"bill\": 45000000,\n    \"paid_amount\": 9000000,\n    \"due_amount\": 36000000,\n    \"next_installment_date\": \"2025-05-19 02:25:48.185490\",\n    \"installment_count\": 1,\n    \"total_installment\": 5\n}"
+						}
+					]
+				},
+				{
+					"name": "get a cart-item",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/carts/cart-item/9",
+							"path": [
+								"carts",
+								"cart-item",
+								"9"
+							]
+						},
+						"description": "Pass id: /carts/cart-item/{cart-item-id}"
+					},
+					"response": [
+						{
+							"name": "get a cart-item",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/carts/cart-item/9",
+									"path": [
+										"carts",
+										"cart-item",
+										"9"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:26:09 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "252"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 9,\n    \"customer_id\": 1,\n    \"product_id\": 3,\n    \"product_price\": 15000000,\n    \"cart_item_quantity\": 3,\n    \"bill\": 45000000,\n    \"paid_amount\": 9000000,\n    \"due_amount\": 36000000,\n    \"next_installment_date\": \"2025-05-19 02:25:48.185490\",\n    \"installment_count\": 1,\n    \"total_installment\": 5\n}"
+						}
+					]
+				},
+				{
+					"name": "delete cart-item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "/carts/cart-item/9",
+							"path": [
+								"carts",
+								"cart-item",
+								"9"
+							]
+						},
+						"description": "One can only remove a cart-item if that cart-item have no due. If there is not cart-item in a cart of an user, then the related cart will be deleted from the database automatically.\n\nPass id: /carts/cart-item/{cart-item-id}"
+					},
+					"response": [
+						{
+							"name": "delete cart-item",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "/carts/cart-item/9",
+									"path": [
+										"carts",
+										"cart-item",
+										"9"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:26:28 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "58"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"You cannot delete a cart item with due amount\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Any user (admin and customer) can do these operations."
+		},
+		{
+			"name": "Email Notiication APIs",
+			"item": [
+				{
+					"name": "email notification test",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "/emails/test-email",
+							"path": [
+								"emails",
+								"test-email"
+							]
+						},
+						"description": "Test api to send reminder email notification about installement due.\n\n<img src=\"https://content.pstmn.io/e985658b-db4f-4f48-b9a0-43c8bc0e64fb/ZW1haWwuanBn\" alt=\"Email%20notification%20for%20due%20reminder\" height=\"405\" width=\"333\">"
+					},
+					"response": [
+						{
+							"name": "email notification test",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/emails/test-email",
+									"path": [
+										"emails",
+										"test-email"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:28:15 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "74"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"email sent\",\n    \"result\": \"Installment due email sent successfully\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Test api to send reminder email notification to the customer who have due.  \n  \nMain application will start a corn job every day at 9 AM to send the remainder email. Reminder email notification will be sent to the customer before 3, 1, 0 (can be change from the ENV variable of the application) days of the next installment date."
+		},
+		{
+			"name": "Admin Related APIs",
+			"item": [
+				{
+					"name": "generate weekly/monthly report",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "/admin/reports/generate",
+							"path": [
+								"admin",
+								"reports",
+								"generate"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "json",
+									"disabled": true
+								},
+								{
+									"key": "weekly",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Both query parameters are option. By default `type=csv` and `weekly=true`.\n\nAdmin can generate csv or json report.\n\nOther values of query params:\n\n- `type: json`\n    \n- `weekly: false` (this will generate monthly report)"
+					},
+					"response": [
+						{
+							"name": "generate weekly/monthly report1",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/admin/reports/generate?type=json&weekly=true",
+									"path": [
+										"admin",
+										"reports",
+										"generate"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "json"
+										},
+										{
+											"key": "weekly",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:31:10 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "1050"
+								},
+								{
+									"key": "content-disposition",
+									"value": "attachment; filename=payment_report_20250419_023111.json"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"customer_email\": \"beast.reign10@gmail.com\",\n        \"customer_name\": \"admin\",\n        \"product_name\": \"BMW-L2\",\n        \"installment_count\": 3,\n        \"total_installment\": 4,\n        \"bill\": 50000000,\n        \"product_price\": 10000000,\n        \"cart_item_quantity\": 5,\n        \"paid_amount\": 37500000,\n        \"due_amount\": 12500000,\n        \"due_date\": \"2025-05-17\"\n    },\n    {\n        \"customer_email\": \"beast.reign10@gmail.com\",\n        \"customer_name\": \"admin\",\n        \"product_name\": \"BMW-L1\",\n        \"installment_count\": 1,\n        \"total_installment\": 5,\n        \"bill\": 45000000,\n        \"product_price\": 15000000,\n        \"cart_item_quantity\": 3,\n        \"paid_amount\": 9500000,\n        \"due_amount\": 35500000,\n        \"due_date\": \"2025-05-18\"\n    },\n    {\n        \"customer_email\": \"beast.reign10@gmail.com\",\n        \"customer_name\": \"admin\",\n        \"product_name\": \"BMW-L1\",\n        \"installment_count\": 1,\n        \"total_installment\": 5,\n        \"bill\": 45000000,\n        \"product_price\": 15000000,\n        \"cart_item_quantity\": 3,\n        \"paid_amount\": 9000000,\n        \"due_amount\": 36000000,\n        \"due_date\": \"2025-05-19\"\n    }\n]"
+						},
+						{
+							"name": "generate weekly/monthly report2",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/admin/reports/generate?type=csv",
+									"path": [
+										"admin",
+										"reports",
+										"generate"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "csv"
+										},
+										{
+											"key": "weekly",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:31:32 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "444"
+								},
+								{
+									"key": "content-disposition",
+									"value": "attachment; filename=payment_report_20250419_023133.csv"
+								},
+								{
+									"key": "content-type",
+									"value": "text/csv"
+								}
+							],
+							"cookie": [],
+							"body": "customer_email,customer_name,product_name,installment_count,total_installment,bill,product_price,cart_item_quantity,paid_amount,due_amount,due_date\r\nbeast.reign10@gmail.com,admin,BMW-L2,3,4,50000000.0,10000000.0,5,37500000.0,12500000.0,2025-05-17\r\nbeast.reign10@gmail.com,admin,BMW-L1,1,5,45000000.0,15000000.0,3,9500000.0,35500000.0,2025-05-18\r\nbeast.reign10@gmail.com,admin,BMW-L1,1,5,45000000.0,15000000.0,3,9000000.0,36000000.0,2025-05-19\r\n"
+						}
+					]
+				},
+				{
+					"name": "admin search option",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/admin/search?query=2500000",
+							"path": [
+								"admin",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "2500000"
+								}
+							]
+						},
+						"description": "Admin can search by any query value. Numbers will show exact and partial results. Date must be exact. Other query param will show the partial results."
+					},
+					"response": [
+						{
+							"name": "admin search option1",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/admin/search?query=2500000",
+									"path": [
+										"admin",
+										"search"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "2500000"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "date",
+									"value": "Fri, 18 Apr 2025 20:33:28 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "381"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"results\": [\n        {\n            \"customer_id\": 1,\n            \"customer_name\": \"admin\",\n            \"customer_email\": \"beast.reign10@gmail.com\",\n            \"customer_mobile\": \"01943749831\",\n            \"product_id\": 2,\n            \"product_name\": \"BMW-L2\",\n            \"product_price\": 10000000,\n            \"cart_item_id\": 8,\n            \"installment_count\": 3,\n            \"total_installment\": 4,\n            \"bill\": 50000000,\n            \"cart_item_quantity\": 5,\n            \"paid_amount\": 37500000,\n            \"due_amount\": 12500000,\n            \"due_date\": \"2025-05-17\"\n        }\n    ],\n    \"count\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "generate weekly/monthly payment chart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "/admin/payment-charts",
+							"path": [
+								"admin",
+								"payment-charts"
+							]
+						},
+						"description": "Admin can generate a `Due vs. Paid Amounts` bar-chart.\n\n**Response chart:**\n\n<img src=\"https://content.pstmn.io/24666a9b-2254-4b86-84e3-56af9557639d/aW1hZ2UucG5n\" alt=\"\" height=\"692\" width=\"531\">"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs to search, generate reports and charts. Only for admin."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"pm.request.url.protocol = \"http\";\r",
+					"pm.request.url.host = [\"localhost\"];\r",
+					"pm.request.url.port = \"8000\";\r",
+					"\r",
+					"pm.request.headers.add({\r",
+					"    key: \"Authorization\",\r",
+					"    value: \"Bearer {{authToken}}\"\r",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "authToken",
+			"value": "0f9f735f-888d-4483-b0bb-6698c6e0627b",
+			"type": "string"
+		}
+	]
+}
