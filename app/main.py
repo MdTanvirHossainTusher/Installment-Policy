@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, RedirectResponse
 from app.database import engine
 from app.database import Base
 from app.routes import admin_route, customer_route, auth_route, product_route, category_route, cart_item_route, email_route, logged_user_route
@@ -31,6 +32,10 @@ app.include_router(email_route.router)
 app.include_router(admin_route.router)
 app.include_router(logged_user_route.router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return RedirectResponse(url="/static/index.html")
 
 @app.on_event("startup")
 def startup_event():
