@@ -111,6 +111,10 @@ class RBACMiddleware(BaseHTTPMiddleware):
 
         if path in ['', '/']:
             return await call_next(request)
+        
+        for excluded in EXCLUDED_PATHS:
+            if fnmatch.fnmatch(path, excluded):
+                return await call_next(request)
 
         for excluded in EXCLUDED_PATHS:
             if path == excluded:
