@@ -10,6 +10,7 @@ import fnmatch
 
 RESOURCES_FOR_ROLES = {
     'admin': {
+        '/': ['read'],
         '/customers': ['read', 'write', 'update', 'delete'],
         '/customers/#/me': ['read', 'write', 'update', 'delete'],
         '/customers/**': ['read', 'write', 'update', 'delete'],
@@ -34,6 +35,7 @@ RESOURCES_FOR_ROLES = {
         '/current-logged-in-user-details': ['read', 'write', 'update', 'delete'],
     },
     'user': {
+        '/': ['read'],
         '/customers': ['read'],
         '/customers/**': ['read', 'update'],
         '/auth/register': ['write'],
@@ -56,7 +58,7 @@ RESOURCES_FOR_ROLES = {
     }
 }
 
-EXCLUDED_PATHS = ['/docs', '/openapi.json', '/auth/register', '/auth/login', '/auth/verify_otp', '/auth/resend_otp', '/auth/me']
+EXCLUDED_PATHS = ['/', '/docs', '/openapi.json', '/auth/register', '/auth/login', '/auth/verify_otp', '/auth/resend_otp', '/auth/me']
 
 def translate_method_to_action(method: str) -> str:
     method_permission_mapping = {
@@ -106,6 +108,9 @@ async def get_user_role_from_token(authorization, db):
 class RBACMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
+        
+        if path == '/':
+            return await call_next(request)
 
         for excluded in EXCLUDED_PATHS:
             if path == excluded:
