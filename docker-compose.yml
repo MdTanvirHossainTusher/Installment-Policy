@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - product-images:/app/app/static/product_images
+    environment:
+      - DATABASE_URL=postgresql://rodfot:NIoWkBnHUaxJhMmsmUWnEkOSCeOOfdEy4@dpg-d01kalffdfruibrs73at5sug-a.singapore-postgres.render.com/installment_policy_db
+    env_file:
+      - .env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+volumes:
+  product-images:
