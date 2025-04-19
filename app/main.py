@@ -14,7 +14,7 @@ app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return RedirectResponse(url="app/static/index.html")
+    return RedirectResponse(url="/static/index.html")
 
 app.add_middleware(
     CORSMiddleware,
