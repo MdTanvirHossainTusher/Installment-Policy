@@ -35,7 +35,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return RedirectResponse(url="/static/index.html")
+    return RedirectResponse(url="app/static/index.html")
 
 @app.on_event("startup")
 def startup_event():
