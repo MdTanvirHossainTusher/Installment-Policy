@@ -59,9 +59,12 @@ RESOURCES_FOR_ROLES = {
 }
 
 # EXCLUDED_PATHS = ['/', '/docs', '/openapi.json', '/auth/register', '/auth/login', '/auth/verify_otp', '/auth/resend_otp', '/auth/me']
+
 EXCLUDED_PATHS = [
     '/',
-    '/index.html',        
+    '/index.html',  
+    '/register.html', 
+    '/home.html',       
     '/static/*',
     '/favicon.ico',
     '/docs',
