@@ -30,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(RBACMiddleware)
+app.add_middleware(RBACMiddleware)
 
 app.include_router(customer_route.router)
 app.include_router(auth_route.router)
