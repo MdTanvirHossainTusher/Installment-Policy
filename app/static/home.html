@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Product Home</title>
+    <title>Product List</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .product-card { cursor: pointer; transition: transform 0.2s; }
@@ -18,11 +18,10 @@
     </div>
 
     <div class="row" id="productList">
-        <!-- Products will be injected here -->
+
     </div>
 </div>
 
-<!-- Add Product Modal -->
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" id="addProductForm">
@@ -46,77 +45,119 @@
 </div>
 
 <script>
-    const sessionToken = localStorage.getItem("session_token"); // Must be set after login
 
-    let currentUser = null;
+const sessionToken = localStorage.getItem("session_token");
+let currentUser = null;
+const baseUrl = window.location.hostname === 'localhost' ? 
+    'http://localhost:8000' : 
+    'https://installment-policy.onrender.com';
 
-    async function getCurrentUser() {
-        const res = await fetch("http://localhost:8000/auth/me", {
-            headers: { "Authorization": `Bearer ${sessionToken}` }
+async function getCurrentUser() {
+    try {
+        const res = await fetch(`${baseUrl}/current-logged-in-user-details`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${sessionToken}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         });
+        
         if (res.ok) {
             currentUser = await res.json();
             if (currentUser.role === 'admin') {
                 document.getElementById("addProductBtn").classList.remove("d-none");
             }
+        } else {
+            console.error("Failed to get current user:", res.status);
         }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
     }
+}
 
-    async function loadProducts() {
-        const res = await fetch("http://localhost:8000/products", {
-            headers: { "Authorization": `Bearer ${sessionToken}` }
+async function loadProducts() {
+    try {
+        const res = await fetch(`${baseUrl}/products`, {
+            method: "GET",
+            headers: { 
+                "Authorization": `Bearer ${sessionToken}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         });
-        const data = await res.json();
-        const productList = document.getElementById("productList");
-        productList.innerHTML = "";
-        data.items.forEach(product => {
-            const col = document.createElement("div");
-            col.className = "col-md-4 mb-4";
-            col.innerHTML = `
-                <div class="card product-card" onclick="viewProduct(${product.id})">
-                    <img src="${product.image_url}" class="card-img-top product-img" alt="${product.name}">
-                    <div class="card-body">
-                        <h5 class="card-title">${product.name}</h5>
-                        <p class="card-text">${product.description}</p>
-                        <p class="card-text"><strong>$${product.price}</strong></p>
-                        <button class="btn btn-outline-primary me-2" onclick="event.stopPropagation(); addToCart(${product.id})">Add to Cart</button>
-                        ${currentUser?.role === 'admin' ? `<button class="btn btn-warning" onclick="event.stopPropagation(); editProduct(${product.id})">Edit</button>` : ''}
+        
+        if (res.ok) {
+            const data = await res.json();
+            const productList = document.getElementById("productList");
+            productList.innerHTML = "";
+            data.items.forEach(product => {
+                const col = document.createElement("div");
+                col.className = "col-md-4 mb-4";
+                col.innerHTML = `
+                    <div class="card product-card" onclick="viewProduct(${product.id})">
+                        <img src="${product.image_url}" class="card-img-top product-img" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="card-text"><strong>$${product.price}</strong></p>
+                            <button class="btn btn-outline-primary me-2" onclick="event.stopPropagation(); addToCart(${product.id})">Add to Cart</button>
+                            ${currentUser?.role === 'admin' ? `<button class="btn btn-warning" onclick="event.stopPropagation(); editProduct(${product.id})">Edit</button>` : ''}
+                        </div>
                     </div>
-                </div>
-            `;
-            productList.appendChild(col);
-        });
+                `;
+                productList.appendChild(col);
+            });
+        } else {
+            console.error("Failed to load products:", res.status);
+        }
+    } catch (error) {
+        console.error("Error loading products:", error);
     }
+}
 
-    async function addToCart(productId) {
-        const res = await fetch(`http://localhost:8000/products/${productId}/add-to-cart`, {
+async function addToCart(productId) {
+    try {
+        const res = await fetch(`${baseUrl}/products/${productId}/add-to-cart`, {
             method: "POST",
-            headers: { "Authorization": `Bearer ${sessionToken}` }
+            headers: { 
+                "Authorization": `Bearer ${sessionToken}`,
+                "Content-Type": "application/json"
+            }
         });
+        
         if (res.ok) {
             alert("Product added to cart!");
         } else {
             alert("Failed to add to cart.");
         }
+    } catch (error) {
+        console.error("Error adding to cart:", error);
     }
+}
 
-    function viewProduct(id) {
-        window.location.href = `/products/${id}`;
-    }
+function viewProduct(id) {
+    window.location.href = `/products/${id}`;
+}
 
-    function editProduct(id) {
-        window.location.href = `/products/${id}`;
-    }
+function editProduct(id) {
+    window.location.href = `/products/${id}`;
+}
 
-    document.getElementById("addProductForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const res = await fetch("http://localhost:8000/products", {
+document.getElementById("addProductForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    try {
+        const res = await fetch(`${baseUrl}/products`, {
             method: "POST",
-            headers: { "Authorization": `Bearer ${sessionToken}` },
+            headers: { 
+                "Authorization": `Bearer ${sessionToken}`
+            },
             body: formData
         });
+        
         if (res.ok) {
             alert("Product added!");
             form.reset();
@@ -126,18 +167,27 @@
         } else {
             alert("Failed to add product.");
         }
-    });
+    } catch (error) {
+        console.error("Error adding product:", error);
+    }
+});
 
-    // Initial Load
-    window.onload = async () => {
-        if (!sessionToken) {
-            alert("No session token found. Please log in.");
-            return;
-        }
+window.onload = async () => {
+    if (!sessionToken) {
+        alert("No session token found. Please log in.");
+        return;
+    }
+    try {
         await getCurrentUser();
         await loadProducts();
+    } catch (error) {
+        console.error("Error initializing page:", error);
     }
+}
 </script>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

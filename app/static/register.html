@@ -54,6 +54,10 @@ const verifyOtpBtn = document.getElementById("verifyOtpBtn");
 const resendOtpBtn = document.getElementById("resendOtpBtn");
 let registeredEmail = "";
 
+const baseUrl = window.location.hostname === 'localhost' ? 
+        'http://localhost:8000' : 
+        'https://installment-policy.onrender.com';
+
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -61,7 +65,7 @@ registerForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch("http://localhost:8000/auth/register", {
+    const response = await fetch(`${baseUrl}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -87,7 +91,7 @@ verifyOtpBtn.addEventListener("click", async () => {
   const otp = document.getElementById("otp").value;
 
   try {
-    const response = await fetch("http://localhost:8000/auth/verify_otp", {
+    const response = await fetch(`${baseUrl}/auth/verify_otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -112,7 +116,7 @@ verifyOtpBtn.addEventListener("click", async () => {
 
 resendOtpBtn.addEventListener("click", async () => {
   try {
-    const response = await fetch("http://localhost:8000/auth/resend_otp", {
+    const response = await fetch(`${baseUrl}/auth/resend_otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

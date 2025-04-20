@@ -18,8 +18,13 @@ async def root():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:3000"],
-    # allow_origins=["*"],
+        allow_origins=[
+        "*",
+        "http://localhost:8000",
+        "http://localhost:3000",
+        "https://installment-policy.onrender.com",
+        "http://127.0.0.1:5500/",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,10 +41,6 @@ app.include_router(email_route.router)
 app.include_router(admin_route.router)
 app.include_router(logged_user_route.router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-# @app.get("/", response_class=HTMLResponse)
-# async def root():
-#     return RedirectResponse(url="app/static/index.html")
 
 @app.on_event("startup")
 def startup_event():
