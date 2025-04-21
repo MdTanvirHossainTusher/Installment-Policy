@@ -254,7 +254,7 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date),
+                next_installment_date=str(cart_item.next_installment_date or None),
                 installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             );
@@ -384,8 +384,6 @@ class ProductService:
             self.db.commit()
             self.db.refresh(cart_item)
             
-            print(f"Date set: {cart_item.next_installment_date}")
-            
             return CartItemResponse(
                 id=cart_item.id,
                 customer_id=customer_id,
@@ -488,7 +486,7 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date),
+                next_installment_date=str(cart_item.next_installment_date or None),
                 installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             ) for cart_item in cart_items]
@@ -533,7 +531,7 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date),
+                next_installment_date=str(cart_item.next_installment_date or None),
                 installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             )
@@ -561,8 +559,10 @@ class ProductService:
                 and_(
                     CartItem.deleted == False,
                     Cart.deleted == False,
-                    CartItem.next_installment_date >= start_date,
-                    CartItem.next_installment_date <= end_date
+                    # CartItem.next_installment_date >= start_date,
+                    # CartItem.next_installment_date <= end_date
+                    CartItem.updated_at >= start_date,
+                    CartItem.updated_at <= end_date
                 )
             ).all())
 
@@ -579,7 +579,7 @@ class ProductService:
                     'cart_item_quantity': item.cart_item_quantity,
                     'paid_amount': item.paid,
                     'due_amount': item.due,
-                    'due_date': item.next_installment_date.strftime('%Y-%m-%d')
+                    'due_date': item.next_installment_date.strftime('%Y-%m-%d') if item.next_installment_date else None
                 })
             
             return report_data
