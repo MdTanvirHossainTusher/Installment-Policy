@@ -303,50 +303,87 @@ class ProductService:
                         detail="You cannot update the quantity of the product after first installment"
                     )
                 cart_item.cart_item_quantity = updated_cart_item.cart_item_quantity
-            
+
             total_price = cart_item.price * cart_item.cart_item_quantity
-            
-            min_payment_per_installment = total_price / cart_item.total_installment
-            
-            if updated_cart_item.paid_amount < min_payment_per_installment:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"You must pay at least {min_payment_per_installment} of the total product price"
-                )
-            
-            if updated_cart_item.paid_amount > total_price:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Paid amount cannot be greater than the total product price"
-                )
-            
+
             if cart_item.installment_count == cart_item.total_installment:
                 raise HTTPException(
                     status_code=400,
                     detail="You have already completed all installments for this product. Thank you!"
                 )
             
+            remaining_amount = total_price - cart_item.paid
+            
+            if updated_cart_item.paid_amount < 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Paid amount cannot be negative"
+                )
+            
             if is_first_installment:
+            
+                if cart_item.total_installment == 1:
+                    min_payment = total_price
+                else:
+                    min_payment = total_price / cart_item.total_installment
+                    
+                if updated_cart_item.paid_amount < min_payment:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"You must pay at least {min_payment} of the total product price"
+                    )
+                
+                if updated_cart_item.paid_amount > total_price and cart_item.total_installment > 1:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Paid amount cannot exceed the total product price of {total_price}"
+                    )
+                
                 cart_item.paid = updated_cart_item.paid_amount
             else:
+                remaining_installments = cart_item.total_installment - cart_item.installment_count
+                
+                if remaining_installments == 1:
+                    if updated_cart_item.paid_amount != remaining_amount:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"For the final installment, you must pay exactly the remaining amount: {remaining_amount}"
+                        )
+                else:
+                    min_payment_in_other_installment = remaining_amount / remaining_installments
+                    
+                    if updated_cart_item.paid_amount < min_payment_in_other_installment:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"You must pay at least {min_payment_in_other_installment} for this installment"
+                        )
+                    
+                    if updated_cart_item.paid_amount > remaining_amount:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Paid amount cannot exceed the remaining balance of {remaining_amount}"
+                        )
+                
                 cart_item.paid = cart_item.paid + updated_cart_item.paid_amount
             
             cart_item.bill = total_price
             cart_item.due = cart_item.bill - cart_item.paid
-            
-            next_date = datetime.now() + timedelta(days=30)
-            cart_item.next_installment_date = next_date
-            
-            cart_item.installment_count += 1
 
-            # cart_item.created_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name,
-            cart_item.updated_by=self.db.query(Customer).filter(Customer.id == customer_id).first().name
+            if cart_item.due == 0:
+                cart_item.installment_count = cart_item.total_installment
+                cart_item.next_installment_date = None
+            else:
+                next_date = datetime.now() + timedelta(days=30)
+                cart_item.next_installment_date = next_date
+                cart_item.installment_count += 1
+
+            cart_item.updated_by = self.db.query(Customer).filter(Customer.id == customer_id).first().name
             
             self.db.add(cart_item)
             self.db.commit()
             self.db.refresh(cart_item)
             
-            print(f"Date set: {next_date}, Retrieved date: {cart_item.next_installment_date}")
+            print(f"Date set: {cart_item.next_installment_date}")
             
             return CartItemResponse(
                 id=cart_item.id,
@@ -357,7 +394,7 @@ class ProductService:
                 bill=cart_item.bill,
                 paid_amount=cart_item.paid,
                 due_amount=cart_item.due,
-                next_installment_date=str(cart_item.next_installment_date),
+                next_installment_date=str(cart_item.next_installment_date) if cart_item.next_installment_date else None,
                 installment_count=cart_item.installment_count,
                 total_installment=cart_item.total_installment
             )
@@ -368,7 +405,6 @@ class ProductService:
                 status_code=500,
                 detail=f"Error updating cart item: {str(e)}"
             )
-        
 
         
     def delete_cart_item(self, cart_item_id: int, customer_id: int):

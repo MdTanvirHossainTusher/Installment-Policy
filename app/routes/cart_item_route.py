@@ -15,11 +15,7 @@ from app.utils import AuthUtils
 router = APIRouter(prefix="/carts", tags=["Cart APIs"])
 
 add_pagination(router)
-
 db_session = Depends(get_db)
-
-
-
 
 @router.put("/cart-item/{cart_item_id}")
 async def update_cart_item(

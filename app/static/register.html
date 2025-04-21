@@ -65,7 +65,7 @@ registerForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
 
   try {
-    const response = await fetch(`https://installment-policy.onrender.com/auth/register`, {
+    const response = await fetch(`${baseUrl}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -91,7 +91,7 @@ verifyOtpBtn.addEventListener("click", async () => {
   const otp = document.getElementById("otp").value;
 
   try {
-    const response = await fetch(`https://installment-policy.onrender.com/auth/verify_otp`, {
+    const response = await fetch(`${baseUrl}/auth/verify_otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -116,7 +116,7 @@ verifyOtpBtn.addEventListener("click", async () => {
 
 resendOtpBtn.addEventListener("click", async () => {
   try {
-    const response = await fetch(`https://installment-policy.onrender.com/auth/resend_otp`, {
+    const response = await fetch(`${baseUrl}/auth/resend_otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -126,7 +126,7 @@ resendOtpBtn.addEventListener("click", async () => {
 
     const data = await response.json();
     if (response.ok) {
-        const message = "OTP verified";
+        const message = "OTP resent successfully. Please check your email.";
         responseMessage.innerHTML = `<div class="alert alert-info">${message}</div>`;
     } else {
       responseMessage.innerHTML = `<div class="alert alert-danger">${data.detail || "Resend OTP failed"}</div>`;
