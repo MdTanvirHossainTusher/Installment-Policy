@@ -44,6 +44,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/static/cart-items.html">Cart</a>
                     </li>
+                    <li class="nav-item" id="dashboardLink">
+                        <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -178,7 +181,10 @@
                 if (res.ok) {
                     currentUser = await res.json();
                     if (currentUser.role === 'admin') {
-                        document.getElementById("addProductBtn").classList.remove("d-none");
+                        document.getElementById("addProductBtn").classList.remove("d-none");                        
+                    }
+                    else {
+                        document.getElementById('dashboardLink').style.display = 'none';
                     }
                 } else {
                     console.error("Failed to get current user:", res.status);
@@ -299,6 +305,9 @@
                                 ${currentUser?.role === 'admin' ? 
                                     `<button class="btn btn-sm btn-warning" onclick="editProduct(${product.id})">Edit</button>` : 
                                     ''}
+                                ${currentUser?.role === 'admin' ? 
+                                    `<button class="btn btn-sm btn-danger" onclick="removeProduct(${product.id})">Remove</button>` : 
+                                    ''}
                             </div>
                         </td>
                     </tr>
@@ -396,6 +405,35 @@
                 alert(`Error: ${error.message}`);
             }
         }
+
+        async function removeProduct(productId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert("Only admins can remove products");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${baseUrl}/products/${productId}`, {
+                    method: "DELETE",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+                
+                if (res.ok) {
+                    alert("Product removed successfully!");
+                    loadProducts(currentPage);
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to fetch product: ${errorData.detail || "Unknown error"}`);
+                }
+            } catch (error) {
+                console.error("Error fetching product:", error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+
 
         document.getElementById("closeEditModalBtn").addEventListener("click", function() {
             document.getElementById("editProductModal").style.display = "none";

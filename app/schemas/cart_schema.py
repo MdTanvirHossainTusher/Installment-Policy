@@ -19,6 +19,7 @@ class CartItemResponse(CartBase):
     id: int 
     customer_id: int
     product_id: int
+    product_name: str
     product_price: float
     cart_item_quantity: int
     bill: float

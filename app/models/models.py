@@ -50,6 +50,7 @@ class Product(BaseEntity, Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
 
     category = relationship("Category", back_populates="products")
+    # carts = relationship("CartItem", back_populates="product")
 
 
 
@@ -79,6 +80,7 @@ class CartItem(BaseEntity, Base):
     
     cart = relationship("Cart", back_populates="items")
     product = relationship("Product")
+    # product = relationship("Product", back_populates="carts")
 
 
 class Order(BaseEntity, Base):

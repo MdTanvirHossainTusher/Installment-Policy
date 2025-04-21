@@ -41,6 +41,9 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/static/cart-items.html">Cart</a>
                     </li>
+                    <li class="nav-item" id="dashboardLink">
+                        <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -170,7 +173,7 @@
 
         if (!sessionToken) {
             alert("Please log in to view your cart");
-            window.location.href = "/login.html";
+            window.location.href = "/static/index.html";
         }
 
         async function getCurrentUser() {
@@ -186,11 +189,14 @@
                 
                 if (res.ok) {
                     currentUser = await res.json();
+                    if (currentUser.role !== 'admin') {
+                        document.getElementById("addProductBtn").classList.remove("d-none");                        
+                    }
                 } else {
                     console.error("Failed to get current user:", res.status);
                     if (res.status === 401) {
                         alert("Session expired. Please log in again.");
-                        window.location.href = "/login.html";
+                        window.location.href = "/static/index.html";
                     }
                 }
             } catch (error) {
@@ -268,7 +274,7 @@
                 
                 html += `
                     <tr>
-                        <td>${item.product_name || 'Product'}</td>
+                        <td>${item.product_name}</td>
                         <td>$${item.product_price.toFixed(2)}</td>
                         <td>${item.cart_item_quantity}</td>
                         <td>$${item.bill.toFixed(2)}</td>
