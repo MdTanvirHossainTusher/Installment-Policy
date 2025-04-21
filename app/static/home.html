@@ -32,7 +32,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">Installment Shop</a>
+            <a class="navbar-brand" href="/static/home.html">Installment Shop</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -46,6 +46,9 @@
                     </li>
                     <li class="nav-item" id="dashboardLink">
                         <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="categoryLink">
+                        <a class="nav-link" href="/static/category.html">Category</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -164,7 +167,7 @@
 
         if (!sessionToken) {
             alert("Please log in to view products");
-            window.location.href = "/login.html";
+            window.location.href = "/static/index.html";
         }
 
         async function getCurrentUser() {
@@ -181,16 +184,17 @@
                 if (res.ok) {
                     currentUser = await res.json();
                     if (currentUser.role === 'admin') {
-                        document.getElementById("addProductBtn").classList.remove("d-none");                        
+                        document.getElementById("addProductBtn").classList.remove("d-none");                      
                     }
                     else {
                         document.getElementById('dashboardLink').style.display = 'none';
-                    }
+                        document.getElementById('categoryLink').style.display = 'none';
+                    } 
                 } else {
                     console.error("Failed to get current user:", res.status);
                     if (res.status === 401) {
                         alert("Session expired. Please log in again.");
-                        window.location.href = "/login.html";
+                        window.location.href = "/static/index.html";
                     }
                 }
             } catch (error) {

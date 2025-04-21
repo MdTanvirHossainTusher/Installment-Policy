@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Category List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .edit-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .edit-modal {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/static/home.html">Installment Shop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/static/home.html">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/static/cart-items.html">Cart</a>
+                    </li>
+                    <li class="nav-item" id="dashboardLink">
+                        <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="categoryLink">
+                        <a class="nav-link active" href="/static/category.html">Category</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button id="logoutBtn" class="btn btn-light">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>All Categories</h2>
+            <button id="addCategoryBtn" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add Category</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryList">
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="pagination" class="d-flex justify-content-center mt-4">
+        </div>
+    </div>
+
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" id="addCategoryForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-2" name="name" placeholder="Category Name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="edit-modal-overlay" id="editCategoryModal">
+        <div class="edit-modal">
+            <h4>Edit Category</h4>
+            <form id="editCategoryForm">
+                <input type="hidden" id="editCategoryId">
+                <div class="mb-3">
+                    <label for="editName" class="form-label">Category Name</label>
+                    <input type="text" class="form-control" id="editName" required>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" id="closeEditModalBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const sessionToken = localStorage.getItem("session_token");
+        let currentUser = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        const baseUrl = window.location.hostname === 'localhost' ? 
+            'http://localhost:8000' : 
+            'https://installment-policy.onrender.com';
+
+        if (!sessionToken) {
+            alert("Please log in to view categories");
+            window.location.href = "/static/index.html";
+        }
+
+        async function getCurrentUser() {
+            try {
+                const res = await fetch(`${baseUrl}/current-logged-in-user-details`, {
+                    method: "GET",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    }
+                });
+                
+                if (res.ok) {
+                    currentUser = await res.json();
+                    if (currentUser.role === 'admin') {
+                        document.getElementById("addCategoryBtn").classList.remove("d-none");                        
+                    }
+                    else {
+                        document.getElementById('dashboardLink').style.display = 'none';
+                        document.getElementById('categoryLink').style.display = 'none';
+                        alert("Only admins can access the category management page");
+                        window.location.href = "/static/home.html";
+                    }
+                } else {
+                    console.error("Failed to get current user:", res.status);
+                    if (res.status === 401) {
+                        alert("Session expired. Please log in again.");
+                        window.location.href = "/static/index.html";
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        async function loadCategories(page = 1) {
+            try {
+                const res = await fetch(`${baseUrl}/categories?page=${page}&size=10`, {
+                    method: "GET",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    displayCategories(data.items);
+                    updatePagination(data.page, data.total_pages);
+                } else {
+                    console.error("Failed to load categories:", res.status);
+                    document.getElementById("categoryList").innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                <div class="alert alert-danger">
+                                    Failed to load categories. Please try again later.
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading categories:", error);
+                document.getElementById("categoryList").innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <div class="alert alert-danger">
+                                Error loading categories: ${error.message}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function displayCategories(categories) {
+            const categoryList = document.getElementById("categoryList");
+            
+            if (categories.length === 0) {
+                categoryList.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <div class="alert alert-info">
+                                No categories available.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            categories.forEach(category => {
+                html += `
+                    <tr>
+                        <td>${category.id}</td>
+                        <td>${category.name}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                ${currentUser?.role === 'admin' ? 
+                                    `<button class="btn btn-sm btn-warning" onclick="editCategory(${category.id})">Edit</button>` : 
+                                    ''}
+                                ${currentUser?.role === 'admin' ? 
+                                    `<button class="btn btn-sm btn-danger" onclick="removeCategory(${category.id})">Remove</button>` : 
+                                    ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            categoryList.innerHTML = html;
+        }
+
+        function updatePagination(page, totalPages) {
+            currentPage = page;
+            totalPages = totalPages;
+            
+            const paginationContainer = document.getElementById("pagination");
+            let html = '<nav><ul class="pagination">';
+            
+            html += `
+                <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="return ${page > 1 ? `loadCategories(${page - 1})` : 'false'}">Previous</a>
+                </li>
+            `;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                html += `
+                    <li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="return loadCategories(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            
+            html += `
+                <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="return ${page < totalPages ? `loadCategories(${page + 1})` : 'false'}">Next</a>
+                </li>
+            `;
+            
+            html += '</ul></nav>';
+            paginationContainer.innerHTML = html;
+        }
+
+        async function editCategory(categoryId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert("Only admins can edit categories");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${baseUrl}/categories/${categoryId}`, {
+                    method: "GET",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+                
+                if (res.ok) {
+                    const category = await res.json();
+                    document.getElementById("editCategoryId").value = category.id;
+                    document.getElementById("editName").value = category.name;                    
+                    document.getElementById("editCategoryModal").style.display = "flex";
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to fetch category: ${errorData.detail || "Unknown error"}`);
+                }
+            } catch (error) {
+                console.error("Error fetching category:", error);
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function removeCategory(categoryId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert("Only admins can remove categories");
+                return;
+            }
+            
+            if (confirm("Are you sure you want to delete this category? This action cannot be undone.")) {
+                try {
+                    const res = await fetch(`${baseUrl}/categories/${categoryId}`, {
+                        method: "DELETE",
+                        headers: { 
+                            "Authorization": `Bearer ${sessionToken}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    
+                    if (res.ok) {
+                        alert("Category removed successfully!");
+                        loadCategories(currentPage);
+                    } else {
+                        const errorData = await res.json();
+                        alert(`Failed to delete category: ${errorData.detail || "Unknown error"}`);
+                    }
+                } catch (error) {
+                    console.error("Error deleting category:", error);
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+
+        document.getElementById("closeEditModalBtn").addEventListener("click", function() {
+            document.getElementById("editCategoryModal").style.display = "none";
+        });
+
+        document.getElementById("editCategoryForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const categoryId = document.getElementById("editCategoryId").value;
+            const categoryData = {
+                name: document.getElementById("editName").value
+            };
+            
+            try {
+                const res = await fetch(`${baseUrl}/categories/${categoryId}`, {
+                    method: "PUT",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(categoryData)
+                });
+                
+                if (res.ok) {
+                    alert("Category updated successfully!");
+                    document.getElementById("editCategoryModal").style.display = "none";
+                    loadCategories(currentPage);
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to update: ${errorData.detail || "Unknown error"}`);
+                }
+            } catch (error) {
+                console.error("Error updating category", error);
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        document.getElementById("addCategoryForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const categoryData = {
+                name: new FormData(e.target).get("name")
+            };
+            
+            try {
+                const res = await fetch(`${baseUrl}/categories`, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(categoryData)
+                });
+                
+                if (res.ok) {
+                    alert("Category added successfully!");
+                    e.target.reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("addCategoryModal"));
+                    modal.hide();
+                    loadCategories(currentPage);
+                } else {
+                    const errorData = await res.json();
+                    alert(`Failed to add category: ${errorData.detail || "Unknown error"}`);
+                }
+            } catch (error) {
+                console.error("Error adding category:", error);
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        document.getElementById("logoutBtn").addEventListener("click", async function() {
+            try {
+                const res = await fetch(`${baseUrl}/auth/logout`, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": `Bearer ${sessionToken}`
+                    }
+                });
+                
+                localStorage.removeItem("session_token");
+                window.location.href = "/static/index.html";
+            } catch (error) {
+                console.error("Error logging out:", error);
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        window.onload = async function() {
+            try {
+                await getCurrentUser();
+                await loadCategories();
+            } catch (error) {
+                console.error("Error initializing page:", error);
+            }
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

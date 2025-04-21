@@ -29,7 +29,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">Installment Shop</a>
+            <a class="navbar-brand" href="/static/home.html">Installment Shop</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -41,8 +41,11 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/static/cart-items.html">Cart</a>
                     </li>
-                    <li class="nav-item" id="dashboardLink">
+                    <li class="nav-item" id="dashboardLink" style="display: none;">
                         <a class="nav-link" href="/static/dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item" id="categoryLink" style="display: none;">
+                        <a class="nav-link" href="/static/category.html">Category</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -189,8 +192,12 @@
                 
                 if (res.ok) {
                     currentUser = await res.json();
-                    if (currentUser.role !== 'admin') {
-                        document.getElementById("addProductBtn").classList.remove("d-none");                        
+                    
+                    // Show admin-only menu items if user is admin
+                    if (currentUser.role === 'admin') {
+                        document.getElementById('dashboardLink').style.display = 'block';
+                        document.getElementById('categoryLink').style.display = 'block';
+                        document.getElementById("addProductBtn").classList.remove("d-none");
                     }
                 } else {
                     console.error("Failed to get current user:", res.status);

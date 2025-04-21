@@ -70,7 +70,7 @@
           messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
           localStorage.setItem("session_token", data.session_token);
           setTimeout(() => {
-            window.location.href = "home.html";
+            window.location.href = "/static/home.html";
           }, 1500);
         } else {
           messageDiv.innerHTML = `<div class="alert alert-danger">${data.detail || "Login failed"}</div>`;
